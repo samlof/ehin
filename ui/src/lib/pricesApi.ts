@@ -1,3 +1,5 @@
+import { API_URL } from '$env/static/private';
+
 export interface ResponsePriceEntry {
 	p: number;
 	s: string;
@@ -14,7 +16,8 @@ type fetchType = {
 	(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 	(input: RequestInfo | URL, init?: RequestInit<RequestInitCfProperties>): Promise<Response>;
 };
-const url = 'http://localhost:8080/api/prices/';
+
+const url = API_URL + '/api/prices/';
 export async function getPrices(fetch?: fetchType): Promise<PriceEntry[]> {
 	if (!fetch) {
 		if (!window) {
