@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import fi.ehin.external.NordPoolClient;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@RegisterForReflection(targets={ org.postgresql.ssl.DefaultJavaSSLFactory.class})
 @ApplicationScoped
 public class PriceRepository {
 
