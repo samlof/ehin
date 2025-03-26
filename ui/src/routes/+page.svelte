@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { calculateTax, formatPrice, mwhToKwhPrice } from '$lib/calcUtils';
+	import { formatPrice } from '$lib/calcUtils';
 	import { formatDateDay, formatDateTime } from '$lib/dateUtils';
 	import type { PageProps } from './$types';
 
