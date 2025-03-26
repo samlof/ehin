@@ -68,7 +68,7 @@ public class PriceRepository {
         """
         SELECT price, delivery_start, delivery_end
         FROM price_history
-        WHERE delivery_start > ? AND delivery_end < ?
+        WHERE delivery_start >= ? AND delivery_start < ?
         ORDER BY delivery_start
         """
       )
