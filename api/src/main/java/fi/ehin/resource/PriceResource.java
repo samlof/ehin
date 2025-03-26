@@ -91,7 +91,7 @@ public class PriceResource {
     return RestResponse.ok(new UpdatePricesResponse(true));
   }
 
-  @POST
+  @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/update-prices/{date}")
   public RestResponse<UpdatePricesResponse> updatePricesForDate(

@@ -92,45 +92,32 @@ public class PriceRepository {
     List<NordPoolClient.PriceDataResponseEntry> entryList
   ) {
     try (final var con = dataSource.getConnection()) {
-      for (final var entry : entryList) {
-        try (
-          final var ps = con.prepareStatement(
-            """
-            SELECT price, delivery_start, delivery_end FROM
-            price_history
-            WHERE delivery_start = ?
-            """
-          )
-        ) {
-          ps.setObject(1, entry.deliveryStart());
-          try (final var rs = ps.executeQuery()) {
-            if (rs.next()) {
-              final var entry2 = PriceHistoryEntry.fromSql(rs);
-              if (!entry2.price.equals(entry.entryPerArea().FI())) {
-                Log.errorf(
-                  "Found entry for %s but old price %s not same as new %s",
-                  entry.deliveryStart(),
-                  entry2.price,
-                  entry.entryPerArea().FI()
-                );
-              }
-              continue;
-            }
-          }
+      final var sb = new StringBuilder();
+      sb.append(
+        "INSERT INTO price_history (price, delivery_start, delivery_end)\nVALUES\n"
+      );
+      for (int i = 0; i < entryList.size(); i++) {
+        sb.append("(?, ?, ?)");
+        if (i < entryList.size() - 1) {
+          sb.append(", \n");
         }
-        try (
-          final var ps = con.prepareStatement(
-            """
-            INSERT INTO price_history (price, delivery_start, delivery_end)
-            VALUES (?, ?, ?)
-            """
-          )
-        ) {
-          ps.setBigDecimal(1, entry.entryPerArea().FI());
-          ps.setObject(2, entry.deliveryStart());
-          ps.setObject(3, entry.deliveryEnd());
-          ps.execute();
+      }
+      sb.append(" ON CONFLICT (delivery_start) DO NOTHING");
+      try (final var ps = con.prepareStatement(sb.toString())) {
+        int paramCounter = 1;
+        for (final var entry : entryList) {
+          ps.setBigDecimal(paramCounter++, entry.entryPerArea().FI());
+          ps.setObject(paramCounter++, entry.deliveryStart());
+          ps.setObject(paramCounter++, entry.deliveryEnd());
         }
+
+        ps.execute();
+        final var rowsAffected = ps.getUpdateCount();
+        Log.infof(
+          "Added %d of %d prices to db",
+          rowsAffected,
+          entryList.size()
+        );
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
