@@ -2,6 +2,7 @@ package fi.ehin.resource;
 
 import fi.ehin.repository.PriceRepository;
 import fi.ehin.service.PricesService;
+import io.quarkus.logging.Log;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -46,6 +47,8 @@ public class PriceResource {
   public RestResponse<List<PriceRepository.PriceHistoryEntry>> getPastPrices(
     @PathParam("date") final LocalDate date
   ) {
+    Log.infof("Fetching prices for %s", date);
+
     final var zone = ZoneId.of("Europe/Helsinki");
     final var dateWithTime = date.atTime(
       OffsetTime.of(0, 0, 0, 0, zone.getRules().getOffset(LocalDateTime.now()))
@@ -58,6 +61,7 @@ public class PriceResource {
     String cacheString = CACHE_TEN_HOUR; // 10 hours cache if already have days prices
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
     if (!newestPriceDate.equals(date.plusDays(1))) {
+      Log.infof("Returning one minute cache for prices on %s", date);
       // No tomorrow's prices yet so cache only one minute
       cacheString = CACHE_ONE_MINUTE;
     }
@@ -66,7 +70,7 @@ public class PriceResource {
       .build();
   }
 
-  public record UpdatePricesResponse(OffsetDateTime time, boolean done) {}
+  public record UpdatePricesResponse(boolean done) {}
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -77,24 +81,14 @@ public class PriceResource {
     if (!updatePricesPassword.equals(password)) {
       return RestResponse.notFound();
     }
-    final var zone = ZoneId.of("Europe/Helsinki");
-    final var dateWithTime = LocalDate.now()
-      .atTime(
-        OffsetTime.of(
-          0,
-          0,
-          0,
-          0,
-          zone.getRules().getOffset(LocalDateTime.now())
-        )
-      );
+    Log.infof("Updating prices for tomorrow %s", LocalDate.now().plusDays(1));
     final var prices = pricesService.GetTomorrowsPrices();
     if (prices == null) {
-      return RestResponse.ok(new UpdatePricesResponse(dateWithTime, false));
+      return RestResponse.ok(new UpdatePricesResponse(false));
     }
     priceRepository.insertPrices(prices.multiAreaEntries());
 
-    return RestResponse.ok(new UpdatePricesResponse(dateWithTime, true));
+    return RestResponse.ok(new UpdatePricesResponse(true));
   }
 
   @POST
@@ -107,20 +101,10 @@ public class PriceResource {
     if (!updatePricesPassword.equals(password)) {
       return RestResponse.notFound();
     }
-    final var zone = ZoneId.of("Europe/Helsinki");
-    final var dateWithTime = LocalDate.now()
-      .atTime(
-        OffsetTime.of(
-          0,
-          0,
-          0,
-          0,
-          zone.getRules().getOffset(LocalDateTime.now())
-        )
-      );
+    Log.infof("Updating prices for %s", date);
     final var prices = pricesService.GetPrices(date);
     priceRepository.insertPrices(prices.multiAreaEntries());
 
-    return RestResponse.ok(new UpdatePricesResponse(dateWithTime, true));
+    return RestResponse.ok(new UpdatePricesResponse(true));
   }
 }
