@@ -67,4 +67,6 @@ Easily start your REST Web Services
 ./mvnw clean package -Dnative
 mv target/api-0.1-runner application
 gcloud app deploy
+
+gcloud app deploy cron.yaml
 ```

@@ -1,4 +1,4 @@
-runtime: java21
+runtime: go123
 entrypoint: ./application
 instance_class: F1
 automatic_scaling:
