@@ -64,9 +64,7 @@ Easily start your REST Web Services
 # Building and deploy
 
 ```shell script
-./mvnw clean package -Dnative -Dquarkus.native.container-build=true
-docker build -f src/main/docker/Dockerfile.native . -t ehinfi-api
-docker tag ehinfi-api gcr.io/ehinfi/ehin-api
-gcloud auth configure-docker
-docker push gcr.io/ehinfi/ehin-api
+./mvnw clean package -Dnative
+mv target/api-0.1-runner application
+gcloud app deploy
 ```

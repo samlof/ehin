@@ -14,7 +14,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@RegisterForReflection(targets={ org.postgresql.ssl.DefaultJavaSSLFactory.class})
+@RegisterForReflection(
+  targets = { org.postgresql.ssl.DefaultJavaSSLFactory.class }
+)
 @ApplicationScoped
 public class PriceRepository {
 

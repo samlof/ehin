@@ -7,6 +7,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.util.List;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
 
 @Path("/api")
@@ -26,6 +28,9 @@ public class PriceResource {
     "public, max-age=" + 60 + ", immutable";
   private static final String CACHE_TEN_HOUR =
     "public, max-age=" + 60 * 60 * 10 + ", immutable";
+
+  @ConfigProperty(name = "update-prices.password")
+  String updatePricesPassword;
 
   public PriceResource(
     PriceRepository priceRepository,
@@ -63,10 +68,15 @@ public class PriceResource {
 
   public record UpdatePricesResponse(OffsetDateTime time, boolean done) {}
 
-  @POST
+  @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/update-prices")
-  public UpdatePricesResponse updatePrices() {
+  public RestResponse<UpdatePricesResponse> updatePrices(
+    @QueryParam("p") final String password
+  ) {
+    if (!updatePricesPassword.equals(password)) {
+      return RestResponse.notFound();
+    }
     final var zone = ZoneId.of("Europe/Helsinki");
     final var dateWithTime = LocalDate.now()
       .atTime(
@@ -80,19 +90,23 @@ public class PriceResource {
       );
     final var prices = pricesService.GetTomorrowsPrices();
     if (prices == null) {
-      return new UpdatePricesResponse(dateWithTime, false);
+      return RestResponse.ok(new UpdatePricesResponse(dateWithTime, false));
     }
     priceRepository.insertPrices(prices.multiAreaEntries());
 
-    return new UpdatePricesResponse(dateWithTime, true);
+    return RestResponse.ok(new UpdatePricesResponse(dateWithTime, true));
   }
 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/update-prices/{date}")
-  public UpdatePricesResponse updatePricesForDate(
-    @PathParam("date") final LocalDate date
+  public RestResponse<UpdatePricesResponse> updatePricesForDate(
+    @PathParam("date") final LocalDate date,
+    @QueryParam("p") final String password
   ) {
+    if (!updatePricesPassword.equals(password)) {
+      return RestResponse.notFound();
+    }
     final var zone = ZoneId.of("Europe/Helsinki");
     final var dateWithTime = LocalDate.now()
       .atTime(
@@ -107,6 +121,6 @@ public class PriceResource {
     final var prices = pricesService.GetPrices(date);
     priceRepository.insertPrices(prices.multiAreaEntries());
 
-    return new UpdatePricesResponse(dateWithTime, true);
+    return RestResponse.ok(new UpdatePricesResponse(dateWithTime, true));
   }
 }
