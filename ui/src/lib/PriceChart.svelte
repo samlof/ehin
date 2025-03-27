@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatPrice } from '$lib/calcUtils';
-	import { formatDateTime, isNow } from '$lib/dateUtils';
+	import { formatDateDay, formatDateTime, isNow } from '$lib/dateUtils';
 	import type { PriceEntry } from '$lib/pricesApi';
 	import {
 		Chart,
@@ -12,6 +12,7 @@
 		Legend,
 		Tooltip,
 	} from 'chart.js';
+	import ChartDataLabels from 'chartjs-plugin-datalabels';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -25,12 +26,22 @@
 		const transparentColor = 'rgba(54, 162, 235,0)';
 		const blackColor = 'rgba(100, 100, 100,0.5)';
 		const todayColor = 'rgb(54, 162, 235)';
-		Chart.register(Colors, BarController, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
+		Chart.register(
+			Colors,
+			BarController,
+			BarElement,
+			CategoryScale,
+			LinearScale,
+			Legend,
+			Tooltip,
+			ChartDataLabels,
+		);
 
 		const biggest = formatPrice(Math.max(...prices.map((p) => p.p)));
 
 		new Chart(document.getElementById('acquisitions') as any, {
 			type: 'bar',
+			plugins: [ChartDataLabels],
 			options: {
 				scales: {
 					y: {
@@ -38,6 +49,11 @@
 					},
 				},
 				plugins: {
+					datalabels: {
+						labels: {
+							title: null,
+						},
+					},
 					legend: {
 						labels: {
 							filter(item, data) {
@@ -86,6 +102,20 @@
 						grouped: false,
 						order: 3,
 						categoryPercentage: 0.5,
+						datalabels: {
+							labels: {
+								value: {
+									color: 'black',
+								},
+							},
+							formatter(value, context) {
+								return (value / 100).toFixed(2) + ' c/kWh';
+							},
+							display(context) {
+								const p = prices[context.dataIndex];
+								return isNow(p);
+							},
+						},
 					},
 					{
 						label: 'Hover helper',
@@ -104,6 +134,20 @@
 						order: 1,
 						grouped: false,
 						categoryPercentage: 0.1,
+						datalabels: {
+							labels: {
+								value: {
+									color: 'black',
+								},
+							},
+							formatter(value, context) {
+								return formatDateDay(prices[context.dataIndex].s);
+							},
+							display(context) {
+								const p = prices[context.dataIndex];
+								return formatDateTime(p.s) === '0';
+							},
+						},
 					},
 				],
 			},

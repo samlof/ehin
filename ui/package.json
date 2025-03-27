@@ -47,6 +47,7 @@
 		"wrangler": "^4.4.1"
 	},
 	"dependencies": {
-		"chart.js": "^4.4.8"
+		"chart.js": "^4.4.8",
+		"chartjs-plugin-datalabels": "^2.2.0"
 	}
 }
