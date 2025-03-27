@@ -16,13 +16,24 @@ import {
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { onMount } from 'svelte';
 
+const defaultColor = 'rgba(54, 162, 235,0.5)';
+const redColor = 'rgba(200, 0, 0,0.5)';
+const greenColor = 'rgba(0, 200, 0,0.5)';
+const transparentColor = 'rgba(54, 162, 235,0)';
+const blackColor = 'rgba(100, 100, 100,0.5)';
+
+function chooseColor(p: PriceEntry) {
+	if (p.p > 100) {
+		return redColor;
+	} else if (p.p < 65) {
+		return greenColor;
+	}
+	return defaultColor;
+}
+
 export function setupChart(prices: PriceEntry[]) {
 	let chart: Chart<keyof ChartTypeRegistry, string[], string>;
 	onMount(() => {
-		const defaultColor = 'rgba(54, 162, 235,0.5)';
-		const transparentColor = 'rgba(54, 162, 235,0)';
-		const blackColor = 'rgba(100, 100, 100,0.5)';
-		const todayColor = 'rgb(54, 162, 235)';
 		Chart.register(
 			Colors,
 			BarController,
@@ -40,11 +51,7 @@ export function setupChart(prices: PriceEntry[]) {
 			type: 'bar',
 			plugins: [ChartDataLabels],
 			options: {
-				scales: {
-					y: {
-						beginAtZero: true,
-					},
-				},
+				scales: {},
 				plugins: {
 					datalabels: {
 						labels: {
@@ -89,7 +96,7 @@ export function setupChart(prices: PriceEntry[]) {
 					{
 						label: 'c/kWh',
 						data: prices.map((p) => formatPrice(p.p)),
-						backgroundColor: prices.map((p) => (isNow(p) ? todayColor : defaultColor)),
+						backgroundColor: prices.map(chooseColor),
 						order: 7,
 						grouped: false,
 					},
@@ -106,7 +113,8 @@ export function setupChart(prices: PriceEntry[]) {
 								},
 							},
 							formatter(value, context) {
-								return (value / 100).toFixed(2) + ' c/kWh';
+								const p = prices[context.dataIndex];
+								return formatPrice(p.p) + ' c/kWh';
 							},
 							display(context) {
 								const p = prices[context.dataIndex];
