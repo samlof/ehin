@@ -1,158 +1,20 @@
 <script lang="ts">
-	import { formatPrice } from '$lib/calcUtils';
-	import { formatDateDay, formatDateTime, isNow } from '$lib/dateUtils';
+	import { setupChart } from '$lib/PriceChartCanvasSetup';
 	import type { PriceEntry } from '$lib/pricesApi';
-	import {
-		Chart,
-		Colors,
-		BarController,
-		CategoryScale,
-		LinearScale,
-		BarElement,
-		Legend,
-		Tooltip,
-	} from 'chart.js';
-	import ChartDataLabels from 'chartjs-plugin-datalabels';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		prices: PriceEntry[];
 	}
 
 	let { prices }: Props = $props();
+	const { update } = setupChart(prices);
 
-	onMount(() => {
-		const defaultColor = 'rgba(54, 162, 235,0.5)';
-		const transparentColor = 'rgba(54, 162, 235,0)';
-		const blackColor = 'rgba(100, 100, 100,0.5)';
-		const todayColor = 'rgb(54, 162, 235)';
-		Chart.register(
-			Colors,
-			BarController,
-			BarElement,
-			CategoryScale,
-			LinearScale,
-			Legend,
-			Tooltip,
-			ChartDataLabels,
-		);
-
-		const biggest = formatPrice(Math.max(...prices.map((p) => p.p)));
-
-		new Chart(document.getElementById('acquisitions') as any, {
-			type: 'bar',
-			plugins: [ChartDataLabels],
-			options: {
-				scales: {
-					y: {
-						beginAtZero: true,
-					},
-				},
-				plugins: {
-					datalabels: {
-						labels: {
-							title: null,
-						},
-					},
-					legend: {
-						labels: {
-							filter(item, data) {
-								return item.text === 'c/kWh';
-							},
-						},
-					},
-					tooltip: {
-						filter(e, index, array, data) {
-							return e.dataset.label === 'Hover helper' || e.dataset.label === 'c/kWh';
-						},
-						yAlign: 'center',
-						xAlign: 'center',
-						displayColors: false,
-						callbacks: {
-							title(tooltipItems) {
-								const p = prices[tooltipItems[0].dataIndex];
-								return formatDateTime(p.s) + ' - ' + formatDateTime(p.e);
-							},
-							label(tooltipItem) {
-								return formatPrice(prices[tooltipItem.dataIndex].p) + ' c/kWh';
-							},
-							beforeLabel(tooltipItem) {
-								return '';
-							},
-							labelPointStyle(tooltipItem) {
-								return undefined;
-							},
-						},
-					},
-				},
-			},
-			data: {
-				labels: prices.map((p) => formatDateTime(p.s)),
-				datasets: [
-					{
-						label: 'c/kWh',
-						data: prices.map((p) => formatPrice(p.p)),
-						backgroundColor: prices.map((p) => (isNow(p) ? todayColor : defaultColor)),
-						order: 7,
-						grouped: false,
-					},
-					{
-						label: 'Nyt',
-						data: prices.map((p) => (isNow(p) ? biggest : '0')),
-						grouped: false,
-						order: 3,
-						categoryPercentage: 0.5,
-						datalabels: {
-							labels: {
-								value: {
-									color: 'black',
-								},
-							},
-							formatter(value, context) {
-								return (value / 100).toFixed(2) + ' c/kWh';
-							},
-							display(context) {
-								const p = prices[context.dataIndex];
-								return isNow(p);
-							},
-						},
-					},
-					{
-						label: 'Hover helper',
-						data: prices.map((p) => biggest),
-						backgroundColor: transparentColor,
-						order: 20,
-						hoverBackgroundColor: defaultColor,
-						grouped: false,
-					},
-					{
-						label: 'Day change',
-						backgroundColor: prices.map((p) =>
-							formatDateTime(p.s) === '0' ? blackColor : transparentColor,
-						),
-						data: prices.map((p) => (formatDateTime(p.s) === '0' ? biggest : '0')),
-						order: 1,
-						grouped: false,
-						categoryPercentage: 0.1,
-						datalabels: {
-							labels: {
-								value: {
-									color: 'black',
-								},
-							},
-							formatter(value, context) {
-								return formatDateDay(prices[context.dataIndex].s);
-							},
-							display(context) {
-								const p = prices[context.dataIndex];
-								return formatDateTime(p.s) === '0';
-							},
-						},
-					},
-				],
-			},
-		});
-	});
+	function onfocus() {
+		console.log('update chart');
+		update();
+	}
 </script>
 
-<div style="width: 800px;"><canvas id="acquisitions"></canvas></div>
+<svelte:window {onfocus} />
+
+<div style="width: 800px;"><canvas id="priceChart"></canvas></div>
