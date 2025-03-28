@@ -4,12 +4,22 @@
 
 	let pricesPromise = getPrices();
 
-	function onfocus() {
-		console.log('update chart');
+	let lastUpdate = new Date();
+
+	function updatePrices() {
+		const oneMinute = 1000 * 60;
+		if (new Date().getTime() - lastUpdate.getTime() < oneMinute) {
+			return;
+		}
+		lastUpdate = new Date();
+		console.log('updating prices');
 		const prom = getPrices().then((p) => {
 			pricesPromise = prom;
 			return p;
 		});
+	}
+	function onfocus() {
+		updatePrices();
 	}
 </script>
 
@@ -20,7 +30,7 @@
 	{#await pricesPromise}
 		Loading...
 	{:then prices}
-		<PriceChart {prices} />
+		<PriceChart {prices} {updatePrices} />
 	{:catch error}
 		Failed to load prices {error.message}
 	{/await}

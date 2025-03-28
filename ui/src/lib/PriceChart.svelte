@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { formatPrice } from '$lib/calcUtils';
-	import { isNow } from '$lib/dateUtils';
+	import { formatMillis, isNow } from '$lib/dateUtils';
 	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		prices: PriceEntry[];
+		updatePrices: () => void;
 	}
 
-	let { prices }: Props = $props();
+	let { prices, updatePrices }: Props = $props();
 
 	const sizes: { [key in breakpointVals]: number } = {
 		xs: 20,
@@ -21,10 +23,36 @@
 	};
 	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
 
-	const nextDayVisible = $derived(prices[prices.length - 1].s.getDate() !== new Date().getDate());
+	let now = $state(new Date());
+	const nextDayVisible = $derived(prices[prices.length - 3].s.getDate() !== now.getDate());
 
+	const millisUntil = $derived.by(() => {
+		const utc12 = new Date();
+		utc12.setUTCHours(12, 0, 0, 0);
+		if (utc12.getTime() - now.getTime() < 0) {
+			utc12.setDate(utc12.getDate() + 1);
+		}
+		return utc12.getTime() - now.getTime();
+	});
+
+	onMount(() => {
+		const int = setInterval(() => {
+			now = new Date();
+		}, 1000);
+		return () => {
+			clearInterval(int);
+		};
+	});
+
+	$effect(() => {
+		const tenMinutes = 1000 * 60 * 10;
+		if (!nextDayVisible && millisUntil < tenMinutes) {
+			console.log('asking to update prices');
+			updatePrices();
+		}
+	});
 	const config = $derived(chartConfig(filteredPrices));
-	const priceNow = $derived(filteredPrices.find(isNow));
+	const priceNow = $derived(filteredPrices.find((p) => isNow(p, now)));
 	setupChart('priceChart', () => config);
 </script>
 
@@ -33,6 +61,16 @@
 		<h2>Hinta nyt {formatPrice(priceNow.p)} c/kWh</h2>
 	</article>
 {/if}
+
+<sub class="py-4">
+	{#if nextDayVisible}
+		Seuraavat hinnat julkaistaan huomenna noin kello 14
+	{:else if millisUntil < 0}
+		Seuraavat hinnat ovat saatavilla hetkenä minä hyvänsä
+	{:else}
+		Seuraavien hintojen julkaisuun noin {formatMillis(millisUntil)}
+	{/if}
+</sub>
 
 <div class="canvas-container"><canvas id="priceChart"></canvas></div>
 
