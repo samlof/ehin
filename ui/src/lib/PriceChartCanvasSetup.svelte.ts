@@ -36,6 +36,7 @@ export type MyChartConfig = ChartConfiguration<keyof ChartTypeRegistry, string[]
 export function chartConfig(prices: PriceEntry[]): MyChartConfig {
 	const biggestTemp = formatPrice(Math.max(...prices.map((p) => p.p)));
 	const biggest = +biggestTemp < 10 ? '10' : biggestTemp;
+	const pricesWithoutLast = prices.slice(0, prices.length - 2);
 	return {
 		type: 'bar',
 		plugins: [ChartDataLabels],
@@ -119,10 +120,10 @@ export function chartConfig(prices: PriceEntry[]): MyChartConfig {
 				},
 				{
 					label: 'Day change',
-					backgroundColor: prices.map((p) =>
-						formatDateTime(p.s) === '0' ? blackColor : transparentColor,
-					),
-					data: prices.map((p) => (formatDateTime(p.s) === '0' ? biggest : '0')),
+					backgroundColor: pricesWithoutLast.map((p) => {
+						return formatDateTime(p.s) === '0' ? blackColor : transparentColor;
+					}),
+					data: pricesWithoutLast.map((p) => biggest),
 					order: 1,
 					grouped: false,
 					categoryPercentage: 0.1,

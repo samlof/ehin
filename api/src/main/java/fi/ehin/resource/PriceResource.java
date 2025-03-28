@@ -60,13 +60,14 @@ public class PriceResource {
       OffsetTime.of(0, 0, 0, 0, zone.getRules().getOffset(LocalDateTime.now()))
     );
 
+    // The latest price is the day after's 0-1 prices. So plusDays 3 and for checking plusDays 2
     final var prices = priceRepository.getPrices(
       dateWithTime.minusDays(1),
-      dateWithTime.plusDays(2)
+      dateWithTime.plusDays(3)
     );
     String cacheString = CACHE_LONG; // Long cache if already have all prices
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
-    if (!newestPriceDate.equals(date.plusDays(1))) {
+    if (!newestPriceDate.equals(date.plusDays(2))) {
       // Wait seconds until 12:00 but at least 60 seconds
       final var waitTime = Math.max(DateUtils.secondsUntil12Utc(), 60);
       Log.infof("Returning %d seconds cache for prices on %s", waitTime, date);

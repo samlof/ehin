@@ -21,6 +21,8 @@
 	};
 	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
 
+	const nextDayVisible = $derived(prices[prices.length - 1].s.getDate() !== new Date().getDate());
+
 	const config = $derived(chartConfig(filteredPrices));
 	const priceNow = $derived(filteredPrices.find(isNow));
 	setupChart('priceChart', () => config);
