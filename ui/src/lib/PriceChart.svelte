@@ -26,9 +26,11 @@
 	setupChart('priceChart', () => config);
 </script>
 
-<article class="prose lg:prose-xl pt-5">
-	<h2>Hinta nyt {formatPrice(priceNow!.p)} c/kWh</h2>
-</article>
+{#if priceNow}
+	<article class="prose lg:prose-xl pt-5">
+		<h2>Hinta nyt {formatPrice(priceNow.p)} c/kWh</h2>
+	</article>
+{/if}
 
 <div class="canvas-container"><canvas id="priceChart"></canvas></div>
 
