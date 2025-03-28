@@ -104,6 +104,9 @@ export function chartConfig(prices: PriceEntry[]): MyChartConfig {
 							const p = prices[context.dataIndex];
 							return isNow(p);
 						},
+						offset: -50,
+						anchor: 'center',
+						align: 'start',
 					},
 				},
 				{
