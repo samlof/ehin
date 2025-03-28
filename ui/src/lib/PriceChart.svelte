@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setupChart } from '$lib/PriceChartCanvasSetup';
+	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
 
 	interface Props {
@@ -7,7 +7,8 @@
 	}
 
 	let { prices }: Props = $props();
-	const { update } = setupChart(prices);
+	const config = $derived(chartConfig(prices));
+	const { update } = setupChart('priceChart', () => config);
 
 	function onfocus() {
 		console.log('update chart');

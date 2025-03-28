@@ -10,6 +10,6 @@ export function mwhToKwhPrice(price: number) {
 export function formatPrice(price: number) {
 	const tax = calculateTax(price);
 	const totalPrice = price + tax;
-	// €/mWh to snt/kWh is times 100
+
 	return mwhToKwhPrice(totalPrice);
 }
