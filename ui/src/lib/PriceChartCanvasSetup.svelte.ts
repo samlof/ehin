@@ -34,7 +34,8 @@ function chooseColor(p: PriceEntry) {
 export type MyChartConfig = ChartConfiguration<keyof ChartTypeRegistry, string[], string>;
 
 export function chartConfig(prices: PriceEntry[]): MyChartConfig {
-	const biggest = formatPrice(Math.max(...prices.map((p) => p.p)));
+	const biggestTemp = formatPrice(Math.max(...prices.map((p) => p.p)));
+	const biggest = +biggestTemp < 10 ? '10' : biggestTemp;
 	return {
 		type: 'bar',
 		plugins: [ChartDataLabels],
