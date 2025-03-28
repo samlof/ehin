@@ -15,8 +15,8 @@
 
 <svelte:window {onfocus} />
 
-<article class="prose lg:prose-xl">
-	<h1>Sähkö hinnat</h1>
+<article class="main-content">
+	<article class="prose lg:prose-xl"><h1>Sähkö hinnat</h1></article>
 	{#await pricesPromise}
 		Loading...
 	{:then prices}
@@ -25,3 +25,13 @@
 		Failed to load prices {error.message}
 	{/await}
 </article>
+
+<style>
+	.main-content {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		width: 100vw !important;
+	}
+</style>

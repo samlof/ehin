@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { formatPrice } from '$lib/calcUtils';
+	import { isNow } from '$lib/dateUtils';
+	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
 
@@ -7,8 +10,24 @@
 	}
 
 	let { prices }: Props = $props();
-	const config = $derived(chartConfig(prices));
+
+	const sizes: { [key in breakpointVals]: number } = {
+		xs: 20,
+		s: 15,
+		m: 10,
+		l: 5,
+		xl: 0,
+		xxl: 0,
+	};
+	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
+
+	const config = $derived(chartConfig(filteredPrices));
+	const priceNow = $derived(filteredPrices.find(isNow));
 	setupChart('priceChart', () => config);
 </script>
 
-<div style="width: 800px;"><canvas id="priceChart"></canvas></div>
+<article class="prose lg:prose-xl pt-5">
+	<h2>Hinta nyt {formatPrice(priceNow!.p)} c/kWh</h2>
+</article>
+
+<div style="width: 100vw;"><canvas id="priceChart"></canvas></div>
