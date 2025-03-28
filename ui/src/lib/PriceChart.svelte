@@ -16,8 +16,8 @@
 		s: 15,
 		m: 10,
 		l: 5,
-		xl: 0,
-		xxl: 0,
+		xl: 1,
+		xxl: 1,
 	};
 	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
 
