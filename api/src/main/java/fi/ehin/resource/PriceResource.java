@@ -10,18 +10,11 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import java.time.Instant;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -36,6 +29,8 @@ public class PriceResource {
   private static final String CACHE_LONG =
     "public, max-age=" + 60 * 60 * 168 + ", immutable";
 
+  private static final ZoneId HELSINKI_ZONE = ZoneId.of("Europe/Helsinki");
+
   @ConfigProperty(name = "update-prices.password")
   String updatePricesPassword;
 
@@ -47,6 +42,7 @@ public class PriceResource {
     this.pricesService = pricesService;
   }
 
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/prices/{date}")
@@ -55,9 +51,8 @@ public class PriceResource {
   ) {
     Log.infof("Fetching prices for %s", date);
 
-    final var zone = ZoneId.of("Europe/Helsinki");
     final var dateWithTime = date.atTime(
-      OffsetTime.of(0, 0, 0, 0, zone.getRules().getOffset(LocalDateTime.now()))
+      OffsetTime.of(0, 0, 0, 0, HELSINKI_ZONE.getRules().getOffset(LocalDateTime.now()))
     );
 
     // The latest price is the day after's 0-1 prices. So plusDays 3 and for checking plusDays 2
