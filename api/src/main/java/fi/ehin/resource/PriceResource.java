@@ -2,19 +2,26 @@ package fi.ehin.resource;
 
 import fi.ehin.repository.PriceRepository;
 import fi.ehin.service.PricesService;
+import fi.ehin.utils.DateUtils;
 import io.quarkus.logging.Log;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -25,10 +32,9 @@ public class PriceResource {
   private final PriceRepository priceRepository;
   private final PricesService pricesService;
 
-  private static final String CACHE_ONE_MINUTE =
-    "public, max-age=" + 60 + ", immutable";
-  private static final String CACHE_TEN_HOUR =
-    "public, max-age=" + 60 * 60 * 10 + ", immutable";
+  private static final String CACHE_VAR = "public, max-age=";
+  private static final String CACHE_LONG =
+    "public, max-age=" + 60 * 60 * 168 + ", immutable";
 
   @ConfigProperty(name = "update-prices.password")
   String updatePricesPassword;
@@ -58,12 +64,13 @@ public class PriceResource {
       dateWithTime.minusDays(1),
       dateWithTime.plusDays(2)
     );
-    String cacheString = CACHE_TEN_HOUR; // 10 hours cache if already have days prices
+    String cacheString = CACHE_LONG; // Long cache if already have all prices
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
     if (!newestPriceDate.equals(date.plusDays(1))) {
-      Log.infof("Returning one minute cache for prices on %s", date);
-      // No tomorrow's prices yet so cache only one minute
-      cacheString = CACHE_ONE_MINUTE;
+      // Wait seconds until 12:00 but at least 60 seconds
+      final var waitTime = Math.max(DateUtils.secondsUntil12Utc(), 60);
+      Log.infof("Returning %d seconds cache for prices on %s", waitTime, date);
+      cacheString = CACHE_VAR + waitTime;
     }
     return RestResponse.ResponseBuilder.ok(prices)
       .header("Cache-Control", cacheString)

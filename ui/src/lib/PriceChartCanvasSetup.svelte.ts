@@ -164,14 +164,4 @@ export function setupChart(elementId: string, config: () => MyChartConfig) {
 			}
 		};
 	});
-
-	return {
-		update: () => {
-			if (chart) {
-				chart.destroy();
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				chart = new Chart(document.getElementById(elementId) as any, config());
-			}
-		},
-	};
 }
