@@ -30,4 +30,10 @@
 	<h2>Hinta nyt {formatPrice(priceNow!.p)} c/kWh</h2>
 </article>
 
-<div style="width: 100vw;"><canvas id="priceChart"></canvas></div>
+<div class="canvas-container"><canvas id="priceChart"></canvas></div>
+
+<style>
+	.canvas-container {
+		width: min(100vw, 1200px);
+	}
+</style>
