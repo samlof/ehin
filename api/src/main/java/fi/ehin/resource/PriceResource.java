@@ -10,7 +10,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetTime;
@@ -42,7 +41,6 @@ public class PriceResource {
     this.pricesService = pricesService;
   }
 
-
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/prices/{date}")
@@ -52,7 +50,13 @@ public class PriceResource {
     Log.infof("Fetching prices for %s", date);
 
     final var dateWithTime = date.atTime(
-      OffsetTime.of(0, 0, 0, 0, HELSINKI_ZONE.getRules().getOffset(LocalDateTime.now()))
+      OffsetTime.of(
+        0,
+        0,
+        0,
+        0,
+        HELSINKI_ZONE.getRules().getOffset(LocalDateTime.now())
+      )
     );
 
     // The latest price is the day after's 0-1 prices. So plusDays 3 and for checking plusDays 2
