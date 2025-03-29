@@ -16,6 +16,6 @@ public final class DateUtils {
   }
 
   public static long secondsUntil12Utc() {
-    return secondsUntil12(OffsetDateTime.now(ZoneOffset.UTC));
+    return secondsUntil12(OffsetDateTime.now(ZoneOffset.UTC).withNano(0));
   }
 }
