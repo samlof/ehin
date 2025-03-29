@@ -67,8 +67,8 @@ public class PriceResource {
     String cacheString = CACHE_LONG; // Long cache if already have all prices
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
     if (!newestPriceDate.equals(date.plusDays(2))) {
-      // Wait seconds until 12:00 but at least 60 seconds
-      final var waitTime = Math.max(DateUtils.secondsUntil12Utc(), 60);
+      // Wait seconds until 11:57:30 but at least 60 seconds
+      final var waitTime = Math.max(DateUtils.secondsUntil12Utc() - 60*2+30, 60);
       Log.infof("Returning %d seconds cache for prices on %s", waitTime, date);
       cacheString = CACHE_VAR + waitTime;
     }
