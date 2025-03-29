@@ -1,5 +1,8 @@
 package fi.ehin.resource;
 
+import static fi.ehin.utils.DateUtils.HELSINKI_ZONE;
+import static fi.ehin.utils.RequestUtils.*;
+
 import fi.ehin.repository.PriceRepository;
 import fi.ehin.service.DateService;
 import fi.ehin.service.PricesService;
@@ -21,9 +24,6 @@ import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
 
-import static fi.ehin.utils.DateUtils.HELSINKI_ZONE;
-import static fi.ehin.utils.RequestUtils.*;
-
 @Path("/api")
 public class PriceResource {
 
@@ -35,12 +35,13 @@ public class PriceResource {
   String updatePricesPassword;
 
   public PriceResource(
-          PriceRepository priceRepository,
-          PricesService pricesService, DateService dateService
+    PriceRepository priceRepository,
+    PricesService pricesService,
+    DateService dateService
   ) {
     this.priceRepository = priceRepository;
     this.pricesService = pricesService;
-      this.dateService = dateService;
+    this.dateService = dateService;
   }
 
   @GET
@@ -69,9 +70,13 @@ public class PriceResource {
     String cacheString = CACHE_LONG; // Long cache if already have all prices
     String expiresValue = null;
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
-    if (!newestPriceDate.isAfter( date)) {
-      final var pricesUpdateTime = OffsetDateTime.of(date, LocalTime.of(11,57,0), ZoneOffset.UTC);
-      if(dateService.now().isAfter(pricesUpdateTime)) {
+    if (!newestPriceDate.isAfter(date)) {
+      final var pricesUpdateTime = OffsetDateTime.of(
+        date,
+        LocalTime.of(11, 57, 0),
+        ZoneOffset.UTC
+      );
+      if (dateService.now().isAfter(pricesUpdateTime)) {
         cacheString = CACHE_VAR + ", max-age=60";
       } else {
         expiresValue = DateUtils.getGmtStringForCache(pricesUpdateTime);
