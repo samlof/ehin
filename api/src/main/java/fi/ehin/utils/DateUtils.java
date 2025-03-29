@@ -17,21 +17,22 @@ public final class DateUtils {
   public static final ZoneId HELSINKI_ZONE = ZoneId.of("Europe/Helsinki");
 
   public static long secondsUntil12(final OffsetDateTime fromTime) {
-    return fromTime.until(
-      fromTime.withHour(12).withMinute(0).withSecond(0).withNano(0),
+    final var fromTimeWithUtc = fromTime.withOffsetSameInstant(ZoneOffset.UTC);
+    return fromTimeWithUtc.until(
+            fromTimeWithUtc.withHour(12).withMinute(0).withSecond(0).withNano(0),
       ChronoUnit.SECONDS
     );
   }
 
-  public static long secondsUntil12Utc() {
-    return secondsUntil12(OffsetDateTime.now(ZoneOffset.UTC).withNano(0));
+  public static long secondsUntil12Utc(final OffsetDateTime now) {
+    return secondsUntil12(now.withNano(0));
   }
 
-  public static String getGmtStringForCache() {
+  public static String getGmtStringForCache(final OffsetDateTime now) {
     final var generator = RandomGenerator.getDefault();
 
     final var seconds = generator.nextInt(0, 59);
-    return getGmtStringForCache( OffsetDateTime.now(ZoneOffset.UTC).toLocalDate(),seconds);
+    return getGmtStringForCache(  now.toLocalDate(),seconds);
   }
 
   public static String getGmtStringForCache(final LocalDate date, final int seconds) {

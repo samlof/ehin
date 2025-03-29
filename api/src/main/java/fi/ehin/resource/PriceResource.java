@@ -1,6 +1,7 @@
 package fi.ehin.resource;
 
 import fi.ehin.repository.PriceRepository;
+import fi.ehin.service.DateService;
 import fi.ehin.service.PricesService;
 import fi.ehin.utils.DateUtils;
 import io.quarkus.logging.Log;
@@ -12,35 +13,34 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import static fi.ehin.utils.DateUtils.HELSINKI_ZONE;
+import static fi.ehin.utils.RequestUtils.*;
 
 @Path("/api")
 public class PriceResource {
 
   private final PriceRepository priceRepository;
   private final PricesService pricesService;
-
-  private static final String CACHE_VAR = "public";
-  private static final String CACHE_LONG =
-    "public, max-age=" + 60 * 60 * 168 + ", immutable";
-
+  private final DateService dateService;
 
   @ConfigProperty(name = "update-prices.password")
   String updatePricesPassword;
 
   public PriceResource(
-    PriceRepository priceRepository,
-    PricesService pricesService
+          PriceRepository priceRepository,
+          PricesService pricesService, DateService dateService
   ) {
     this.priceRepository = priceRepository;
     this.pricesService = pricesService;
+      this.dateService = dateService;
   }
 
   @GET
@@ -69,21 +69,18 @@ public class PriceResource {
     String cacheString = CACHE_LONG; // Long cache if already have all prices
     String expiresValue = null;
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
-    if (!newestPriceDate.equals(date.plusDays(2))) {
-      // Wait seconds until 11:57:30 but at least 60 seconds
-      final var waitTime = DateUtils.secondsUntil12Utc() - 60*2+30;
-      if(waitTime < 60) {
-        Log.infof("Returning 60 seconds cache for prices on %s", date);
+    if (!newestPriceDate.isAfter( date)) {
+      final var pricesUpdateTime = OffsetDateTime.of(date, LocalTime.of(11,57,0), ZoneOffset.UTC);
+      if(dateService.now().isAfter(pricesUpdateTime)) {
         cacheString = CACHE_VAR + ", max-age=60";
       } else {
-        expiresValue = DateUtils.getGmtStringForCache();
+        expiresValue = DateUtils.getGmtStringForCache(pricesUpdateTime);
         cacheString = CACHE_VAR;
-        Log.infof("Returning expires %s for prices on %s", expiresValue, date);
       }
     }
     return RestResponse.ResponseBuilder.ok(prices)
-      .header("Cache-Control", cacheString)
-      .header("Expires", expiresValue)
+      .header(CACHE_CONTROL_HEADER, cacheString)
+      .header(EXPIRES_HEADER, expiresValue)
       .build();
   }
 
