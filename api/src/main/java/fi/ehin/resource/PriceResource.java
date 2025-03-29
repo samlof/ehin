@@ -14,9 +14,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
+
+import static fi.ehin.utils.DateUtils.HELSINKI_ZONE;
 
 @Path("/api")
 public class PriceResource {
@@ -24,11 +27,10 @@ public class PriceResource {
   private final PriceRepository priceRepository;
   private final PricesService pricesService;
 
-  private static final String CACHE_VAR = "public, max-age=";
+  private static final String CACHE_VAR = "public";
   private static final String CACHE_LONG =
     "public, max-age=" + 60 * 60 * 168 + ", immutable";
 
-  private static final ZoneId HELSINKI_ZONE = ZoneId.of("Europe/Helsinki");
 
   @ConfigProperty(name = "update-prices.password")
   String updatePricesPassword;
@@ -65,15 +67,23 @@ public class PriceResource {
       dateWithTime.plusDays(3)
     );
     String cacheString = CACHE_LONG; // Long cache if already have all prices
+    String expiresValue = null;
     final var newestPriceDate = prices.getLast().deliveryStart().toLocalDate();
     if (!newestPriceDate.equals(date.plusDays(2))) {
       // Wait seconds until 11:57:30 but at least 60 seconds
-      final var waitTime = Math.max(DateUtils.secondsUntil12Utc() - 60*2+30, 60);
-      Log.infof("Returning %d seconds cache for prices on %s", waitTime, date);
-      cacheString = CACHE_VAR + waitTime;
+      final var waitTime = DateUtils.secondsUntil12Utc() - 60*2+30;
+      if(waitTime < 60) {
+        Log.infof("Returning 60 seconds cache for prices on %s", date);
+        cacheString = CACHE_VAR + ", max-age=60";
+      } else {
+        expiresValue = DateUtils.getGmtStringForCache();
+        cacheString = CACHE_VAR;
+        Log.infof("Returning expires %s for prices on %s", expiresValue, date);
+      }
     }
     return RestResponse.ResponseBuilder.ok(prices)
       .header("Cache-Control", cacheString)
+      .header("Expires", expiresValue)
       .build();
   }
 

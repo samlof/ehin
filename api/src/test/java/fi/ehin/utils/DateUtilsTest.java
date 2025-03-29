@@ -1,9 +1,18 @@
 package fi.ehin.utils;
 
 import io.quarkus.test.junit.QuarkusTest;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static fi.ehin.utils.DateUtils.HELSINKI_ZONE;
+
 
 @QuarkusTest
 public class DateUtilsTest {
@@ -25,4 +34,13 @@ public class DateUtilsTest {
     );
     Assertions.assertEquals(3535, seconds3);
   }
+
+  @Test
+  void testGmtString() {
+    Assertions.assertEquals("Sat, 29 Mar 2025 11:57:00 GMT", DateUtils.getGmtStringForCache(LocalDate.of(2025, 3, 29), 0));
+    Assertions.assertEquals("Sat, 22 Feb 2025 11:57:25 GMT", DateUtils.getGmtStringForCache(LocalDate.of(2025, 2, 22), 25));
+    Assertions.assertEquals("Thu, 29 May 2025 11:57:50 GMT", DateUtils.getGmtStringForCache(LocalDate.of(2025, 5, 29), 50));
+  }
+
+
 }
