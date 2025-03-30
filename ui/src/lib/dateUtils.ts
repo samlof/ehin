@@ -22,8 +22,7 @@ function pad(n: number) {
 	}
 	return n.toString();
 }
-export function formatMillis(ms: number): string {
-	let seconds = ms / 1000;
+export function formatSeconds(seconds: number): string {
 	const hours = Math.floor(seconds / 3600);
 	seconds = seconds % 3600;
 	const minutes = Math.floor(seconds / 60);
@@ -32,7 +31,7 @@ export function formatMillis(ms: number): string {
 	return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-function minutesToMillis(minutes: number) {
-	return 1000 * 60 * minutes;
+function minutesToSeconds(minutes: number) {
+	return 60 * minutes;
 }
-export const millisBeforeToTryFetch = minutesToMillis(20);
+export const secondsBeforeToTryFetch = minutesToSeconds(20);

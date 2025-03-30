@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatPrice } from '$lib/calcUtils';
-	import { formatMillis, isNow, millisBeforeToTryFetch } from '$lib/dateUtils';
+	import { formatSeconds, isNow, secondsBeforeToTryFetch } from '$lib/dateUtils';
 	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
@@ -26,13 +26,13 @@
 	let now = $state(new Date());
 	const nextDayVisible = $derived(prices[prices.length - 3].s.getDate() !== now.getDate());
 
-	const millisUntil = $derived.by(() => {
+	const secondsUntil = $derived.by(() => {
 		const utc12 = new Date();
 		utc12.setUTCHours(12, 15, 0, 0);
 		if (utc12.getTime() - now.getTime() < 0) {
 			utc12.setDate(utc12.getDate() + 1);
 		}
-		return utc12.getTime() - now.getTime();
+		return Math.round((utc12.getTime() - now.getTime()) / 1000);
 	});
 
 	onMount(() => {
@@ -45,7 +45,7 @@
 	});
 
 	$effect(() => {
-		if (!nextDayVisible && millisUntil < millisBeforeToTryFetch) {
+		if (!nextDayVisible && secondsUntil < secondsBeforeToTryFetch) {
 			updatePrices();
 		}
 	});
@@ -63,10 +63,10 @@
 <sub class="py-4">
 	{#if nextDayVisible}
 		Seuraavat hinnat julkaistaan huomenna noin kello 14
-	{:else if millisUntil < 0}
+	{:else if secondsUntil < 0}
 		Seuraavat hinnat ovat saatavilla hetkenä minä hyvänsä
 	{:else}
-		Seuraavien hintojen julkaisuun noin {formatMillis(millisUntil)}
+		Seuraavien hintojen julkaisuun noin {formatSeconds(secondsUntil)}
 	{/if}
 </sub>
 
