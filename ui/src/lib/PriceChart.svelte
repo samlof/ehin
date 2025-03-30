@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatPrice } from '$lib/calcUtils';
-	import { formatMillis, isNow } from '$lib/dateUtils';
+	import { formatMillis, isNow, millisBeforeToTryFetch } from '$lib/dateUtils';
 	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
@@ -28,7 +28,7 @@
 
 	const millisUntil = $derived.by(() => {
 		const utc12 = new Date();
-		utc12.setUTCHours(12, 0, 0, 0);
+		utc12.setUTCHours(12, 15, 0, 0);
 		if (utc12.getTime() - now.getTime() < 0) {
 			utc12.setDate(utc12.getDate() + 1);
 		}
@@ -45,9 +45,7 @@
 	});
 
 	$effect(() => {
-		const tenMinutes = 1000 * 60 * 10;
-		if (!nextDayVisible && millisUntil < tenMinutes) {
-			console.log('asking to update prices');
+		if (!nextDayVisible && millisUntil < millisBeforeToTryFetch) {
 			updatePrices();
 		}
 	});
