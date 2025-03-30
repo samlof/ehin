@@ -8,5 +8,6 @@ describe('lib/dateUtils.ts', () => {
 		expect(formatMillis(1000 * 60 * 5 + 1000 * 15)).toBe('00:05:15');
 
 		expect(formatMillis(1000 * 60 * 60 * 1 + 1000 * 60 * 5 + 1000 * 15)).toBe('01:05:15');
+		expect(formatMillis(1000 * 60 * 60 * 1 + 1000 * 60 * 5 + 1000 * 15 + 422)).toBe('01:05:15');
 	});
 });
