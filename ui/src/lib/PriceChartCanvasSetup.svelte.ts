@@ -17,6 +17,7 @@ import {
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const defaultColor = 'rgba(54, 162, 235,0.5)';
+const blueColor = 'rgba(0, 0, 200,0.5)';
 const redColor = 'rgba(200, 0, 0,0.5)';
 const greenColor = 'rgba(0, 200, 0,0.5)';
 const transparentColor = 'rgba(54, 162, 235,0)';
@@ -25,6 +26,8 @@ const blackColor = 'rgba(100, 100, 100,0.5)';
 function chooseColor(p: PriceEntry) {
 	if (p.p > 100) {
 		return redColor;
+	} else if (p.p < 0) {
+		return blueColor;
 	} else if (p.p < 65) {
 		return greenColor;
 	}
