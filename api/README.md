@@ -64,7 +64,7 @@ Easily start your REST Web Services
 # Building and deploy
 
 ```shell script
-./mvnw clean package -Dnative
+./mvnw clean package -Dnative -DskipTests
 mv target/api-0.1-runner application
 gcloud app deploy
 
