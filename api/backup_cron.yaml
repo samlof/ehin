@@ -1,0 +1,4 @@
+cron:
+  - description: "daily summary job"
+    url: /api/update-prices?p=***
+    schedule: every 1 minutes from 11:30 to 13:00
