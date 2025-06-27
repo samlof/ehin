@@ -13,6 +13,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,7 +34,7 @@ class PriceResourceTest {
       priceRepository.getPrices(Mockito.any(), Mockito.any())
     ).thenReturn(makeEntriesWithTomorrow());
     Mockito.when(dateService.now()).thenReturn(
-      OffsetDateTime.of(
+      ZonedDateTime.of(
         2025,
         3,
         29,
@@ -41,8 +42,8 @@ class PriceResourceTest {
         1,
         1,
         1,
-        DateUtils.HELSINKI_ZONE.getRules().getOffset(Instant.now())
-      )
+        DateUtils.HELSINKI_ZONE
+      ).toOffsetDateTime()
     );
 
     given()
@@ -60,7 +61,7 @@ class PriceResourceTest {
       priceRepository.getPrices(Mockito.any(), Mockito.any())
     ).thenReturn(makeEntriesWithoutAll());
     Mockito.when(dateService.now()).thenReturn(
-      OffsetDateTime.of(
+      ZonedDateTime.of(
         2025,
         3,
         29,
@@ -68,8 +69,8 @@ class PriceResourceTest {
         1,
         1,
         1,
-        DateUtils.HELSINKI_ZONE.getRules().getOffset(Instant.now())
-      )
+        DateUtils.HELSINKI_ZONE
+      ).toOffsetDateTime()
     );
 
     given()
@@ -91,7 +92,7 @@ class PriceResourceTest {
       priceRepository.getPrices(Mockito.any(), Mockito.any())
     ).thenReturn(makeEntriesWithoutAll());
     Mockito.when(dateService.now()).thenReturn(
-      OffsetDateTime.of(
+      ZonedDateTime.of(
         2025,
         3,
         29,
@@ -99,8 +100,8 @@ class PriceResourceTest {
         1,
         1,
         1,
-        DateUtils.HELSINKI_ZONE.getRules().getOffset(Instant.now())
-      )
+        DateUtils.HELSINKI_ZONE
+      ).toOffsetDateTime()
     );
 
     given()
@@ -122,7 +123,7 @@ class PriceResourceTest {
       priceRepository.getPrices(Mockito.any(), Mockito.any())
     ).thenReturn(makeEntriesWithoutAll());
     Mockito.when(dateService.now()).thenReturn(
-      OffsetDateTime.of(
+      ZonedDateTime.of(
         2025,
         3,
         29,
@@ -130,8 +131,8 @@ class PriceResourceTest {
         58,
         1,
         1,
-        DateUtils.HELSINKI_ZONE.getRules().getOffset(Instant.now())
-      )
+        DateUtils.HELSINKI_ZONE
+      ).toOffsetDateTime()
     );
 
     given()

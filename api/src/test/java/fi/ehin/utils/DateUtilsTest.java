@@ -1,16 +1,16 @@
 package fi.ehin.utils;
 
 import io.quarkus.test.junit.QuarkusTest;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class DateUtilsTest {
 
-  private final OffsetDateTime startDate = OffsetDateTime.of(
+  private static final OffsetDateTime startDate = ZonedDateTime.of(
     2025,
     3,
     29,
@@ -18,8 +18,8 @@ public class DateUtilsTest {
     1,
     1,
     1,
-    DateUtils.HELSINKI_ZONE.getRules().getOffset(Instant.now())
-  );
+    DateUtils.HELSINKI_ZONE
+  ).toOffsetDateTime();
 
   @Test
   void testTimeUntilUtc() {
