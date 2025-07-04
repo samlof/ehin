@@ -18,9 +18,9 @@ export function isNow(p: PriceEntry, now?: Date) {
 
 function pad(n: number) {
 	if (n < 10) {
-		return '0' + n.toString();
+		return '0' + n.toString(10);
 	}
-	return n.toString();
+	return n.toString(10);
 }
 export function formatSeconds(seconds: number): string {
 	const hours = Math.floor(seconds / 3600);
