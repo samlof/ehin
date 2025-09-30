@@ -9,6 +9,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+
+// https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=2025-09-30&market=DayAhead&deliveryArea=FI&currency=EUR
+
 @RegisterRestClient(
   baseUri = "https://dataportal-api.nordpoolgroup.com",
   configKey = "nordpool-api"
