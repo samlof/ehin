@@ -18,9 +18,10 @@ public class GreetingResource {
   public void printMemory() {
     System.out.println(
       "Meg used=" +
-      (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) /
-      (1000 * 1000) +
-      "M"
+        (Runtime.getRuntime().totalMemory() -
+          Runtime.getRuntime().freeMemory()) /
+        (1000 * 1000) +
+        "M"
     );
   }
 }

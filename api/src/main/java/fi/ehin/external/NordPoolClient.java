@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-
 // https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=2025-09-30&market=DayAhead&deliveryArea=FI&currency=EUR
 
 @RegisterRestClient(
@@ -34,9 +33,11 @@ public interface NordPoolClient {
     OffsetDateTime deliveryEnd,
     PriceDataResponseData entryPerArea
   ) {}
+
   record PriceDataResponseData(BigDecimal FI) {}
 
   record PriceDataResponseAverage(String areaCode, BigDecimal price) {}
+
   record PriceDataResponseState(String state, List<String> areas) {}
 
   @Path("/api/DayAheadPrices")
