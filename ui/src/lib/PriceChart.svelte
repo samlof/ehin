@@ -5,6 +5,7 @@
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
 	import { onMount } from 'svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	interface Props {
 		prices: PriceEntry[];
@@ -23,10 +24,11 @@
 	};
 	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
 
-	let now = $state(new Date());
+	let now = new SvelteDate();
 	const nextDayVisible = $derived(prices[prices.length - 3].s.getDate() !== now.getDate());
 
 	const secondsUntil = $derived.by(() => {
+		/* eslint-disable svelte/prefer-svelte-reactivity */
 		const utc12 = new Date();
 		utc12.setUTCHours(12, 15, 0, 0);
 		if (utc12.getTime() - now.getTime() < 0) {
@@ -37,7 +39,7 @@
 
 	onMount(() => {
 		const int = setInterval(() => {
-			now = new Date();
+			now.setTime(Date.now());
 		}, 1000);
 		return () => {
 			clearInterval(int);
