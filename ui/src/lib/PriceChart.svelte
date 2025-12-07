@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatPrice } from '$lib/calcUtils';
-	import { formatSeconds, isNow, secondsBeforeToTryFetch } from '$lib/dateUtils';
+	import { formatSeconds, isNow, isNextDayVisible, secondsBeforeToTryFetch } from '$lib/dateUtils';
 	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
 	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
 	import type { PriceEntry } from '$lib/pricesApi';
@@ -34,21 +34,7 @@
 	});
 
 	let now = new SvelteDate();
-	const nextDayVisible = $derived.by(() => {
-		return prices.some((p) => {
-			const s = p.s;
-			// detect if `s` is a later calendar day than `now`
-			const isLaterDay =
-				s.getFullYear() > now.getFullYear() ||
-				(s.getFullYear() === now.getFullYear() && s.getMonth() > now.getMonth()) ||
-				(s.getFullYear() === now.getFullYear() &&
-					s.getMonth() === now.getMonth() &&
-					s.getDate() > now.getDate());
-
-			// only consider later-day prices that are at or after 03:00 local time
-			return isLaterDay && s.getHours() >= 3;
-		});
-	});
+	const nextDayVisible = $derived(isNextDayVisible(prices, now));
 
 	const secondsUntil = $derived.by(() => {
 		/* eslint-disable svelte/prefer-svelte-reactivity */
