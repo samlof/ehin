@@ -32,11 +32,10 @@
 		Loading...
 	{:then prices}
 		<PriceChart {prices} {updatePrices} />
+		<Settings />
 	{:catch error}
 		Failed to load prices {error.message}
 	{/await}
-
-	<Settings />
 </article>
 
 <style>
