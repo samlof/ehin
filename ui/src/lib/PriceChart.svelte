@@ -6,6 +6,7 @@
 	import type { PriceEntry } from '$lib/pricesApi';
 	import { onMount } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
+	import { localSettings } from './stores/localStore.svelte';
 
 	interface Props {
 		prices: PriceEntry[];
@@ -22,7 +23,15 @@
 		xl: 1,
 		xxl: 1,
 	};
-	const filteredPrices = $derived(prices.slice(sizes[breakpoint()]));
+	const filteredPrices = $derived.by(() => {
+		if (localSettings.showOnlyAfterNow.value) {
+			let nowDate = new Date();
+			nowDate.setMinutes(nowDate.getMinutes() - 15);
+			const nowTime = nowDate.getTime();
+			return prices.filter((p) => p.s.getTime() >= nowTime);
+		}
+		return prices.slice(sizes[breakpoint()]);
+	});
 
 	let now = new SvelteDate();
 	const nextDayVisible = $derived(prices[prices.length - 3].s.getDate() !== now.getDate());
@@ -51,7 +60,7 @@
 			updatePrices();
 		}
 	});
-	const config = $derived(chartConfig(filteredPrices));
+	const config = $derived(chartConfig(filteredPrices, localSettings.showOnlyAfterNow.value));
 	const priceNow = $derived(filteredPrices.find((p) => isNow(p, now)));
 	setupChart('priceChart', () => config);
 </script>

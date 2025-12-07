@@ -36,11 +36,11 @@ function chooseColor(p: PriceEntry) {
 
 export type MyChartConfig = ChartConfiguration<keyof ChartTypeRegistry, string[], string>;
 
-export function chartConfig(prices: PriceEntry[]): MyChartConfig {
+export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): MyChartConfig {
 	const biggestTemp = formatPrice(Math.max(...prices.map((p) => p.p)));
 	const biggest = +biggestTemp < 10 ? '10' : biggestTemp;
 	const pricesWithoutLast = prices.slice(0, prices.length - 2);
-	return {
+	const config: MyChartConfig = {
 		type: 'bar',
 		plugins: [ChartDataLabels],
 		options: {
@@ -89,31 +89,6 @@ export function chartConfig(prices: PriceEntry[]): MyChartConfig {
 					grouped: false,
 				},
 				{
-					label: 'Nyt',
-					data: prices.map((p) => (isNow(p) ? biggest : '0')),
-					grouped: false,
-					order: 3,
-					categoryPercentage: 0.5,
-					datalabels: {
-						labels: {
-							value: {
-								color: 'black',
-							},
-						},
-						formatter(value, context) {
-							const p = prices[context.dataIndex];
-							return formatPrice(p.p) + ' c/kWh';
-						},
-						display(context) {
-							const p = prices[context.dataIndex];
-							return isNow(p);
-						},
-						offset: -50,
-						anchor: 'center',
-						align: 'start',
-					},
-				},
-				{
 					label: 'Hover helper',
 					data: prices.map((p) => biggest),
 					backgroundColor: transparentColor,
@@ -148,6 +123,34 @@ export function chartConfig(prices: PriceEntry[]): MyChartConfig {
 			],
 		},
 	};
+	if (!showOnlyAfterNow) {
+		config.data.datasets.push({
+			label: 'Nyt',
+			data: prices.map((p) => (isNow(p) ? biggest : '0')),
+			grouped: false,
+			order: 3,
+			categoryPercentage: 0.5,
+			datalabels: {
+				labels: {
+					value: {
+						color: 'black',
+					},
+				},
+				formatter(value, context) {
+					const p = prices[context.dataIndex];
+					return formatPrice(p.p) + ' c/kWh';
+				},
+				display(context) {
+					const p = prices[context.dataIndex];
+					return isNow(p);
+				},
+				offset: -50,
+				anchor: 'center',
+				align: 'start',
+			},
+		});
+	}
+	return config;
 }
 
 Chart.register(

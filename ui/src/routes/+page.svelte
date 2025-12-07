@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getPrices } from '$lib/pricesApi';
 	import PriceChart from '$lib/PriceChart.svelte';
+	import Settings from '$lib/Settings.svelte';
 
 	let pricesPromise = getPrices();
 
@@ -34,6 +35,8 @@
 	{:catch error}
 		Failed to load prices {error.message}
 	{/await}
+
+	<Settings />
 </article>
 
 <style>
