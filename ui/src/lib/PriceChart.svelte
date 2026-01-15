@@ -25,6 +25,7 @@
 	};
 	const filteredPrices = $derived.by(() => {
 		if (localSettings.showOnlyAfterNow.value) {
+			/* eslint-disable svelte/prefer-svelte-reactivity */
 			let nowDate = new Date();
 			nowDate.setMinutes(nowDate.getMinutes() - 15);
 			const nowTime = nowDate.getTime();
