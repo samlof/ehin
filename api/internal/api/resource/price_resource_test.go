@@ -12,7 +12,6 @@ import (
 	"github.com/samlof/ehin/internal/nordpool"
 	"github.com/samlof/ehin/internal/service"
 	"github.com/samlof/ehin/internal/utils"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -81,7 +80,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 			now:     time.Date(2023, 10, 27, 10, 0, 0, 0, time.UTC),
 			repoReturn: []model.PriceHistoryEntry{
 				{
-					Price:         decimal.NewFromFloat(10.0),
+					Price:         10,
 					DeliveryStart: time.Date(2023, 10, 28, 0, 0, 0, 0, helsinki), // Next day
 				},
 			},
@@ -97,7 +96,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 			now:     time.Date(2023, 10, 27, 10, 0, 0, 0, time.UTC),
 			repoReturn: []model.PriceHistoryEntry{
 				{
-					Price:         decimal.NewFromFloat(10.0),
+					Price:         10,
 					DeliveryStart: time.Date(2023, 10, 27, 23, 0, 0, 0, helsinki), // Same day
 				},
 			},
@@ -113,7 +112,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 			now:     time.Date(2023, 10, 27, 12, 0, 0, 0, time.UTC),
 			repoReturn: []model.PriceHistoryEntry{
 				{
-					Price:         decimal.NewFromFloat(10.0),
+					Price:         10,
 					DeliveryStart: time.Date(2023, 10, 27, 23, 0, 0, 0, helsinki),
 				},
 			},

@@ -6,7 +6,6 @@ import (
 
 	"github.com/samlof/ehin/internal/db/model"
 	"github.com/samlof/ehin/internal/nordpool"
-	"github.com/shopspring/decimal"
 )
 
 type PricesService struct {
@@ -48,7 +47,7 @@ func (s *PricesService) ToPriceHistoryEntries(prices *nordpool.PriceDataResponse
 	for _, entry := range prices.MultiAreaEntries {
 		if fiPrice, ok := entry.EntryPerArea["FI"]; ok {
 			entries = append(entries, model.PriceHistoryEntry{
-				Price:         decimal.NewFromFloat(fiPrice),
+				Price:         fiPrice,
 				DeliveryStart: entry.DeliveryStart,
 				DeliveryEnd:   entry.DeliveryEnd,
 			})

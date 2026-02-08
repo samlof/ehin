@@ -7,7 +7,6 @@ import (
 
 	"github.com/pashagolub/pgxmock/v4"
 	"github.com/samlof/ehin/internal/db/model"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,8 +42,8 @@ func TestPriceRepository_GetPrices(t *testing.T) {
 	to := from.Add(24 * time.Hour)
 
 	rows := pgxmock.NewRows([]string{"price", "delivery_start", "delivery_end"}).
-		AddRow(decimal.NewFromFloat(10.5), from, from.Add(time.Hour)).
-		AddRow(decimal.NewFromFloat(12.0), from.Add(time.Hour), from.Add(2*time.Hour))
+		AddRow(10.5, from, from.Add(time.Hour)).
+		AddRow(12.0, from.Add(time.Hour), from.Add(2*time.Hour))
 
 	mock.ExpectQuery("SELECT price, delivery_start, delivery_end FROM price_history").
 		WithArgs(from, to).
@@ -53,7 +52,7 @@ func TestPriceRepository_GetPrices(t *testing.T) {
 	entries, err := r.GetPrices(context.Background(), from, to)
 	assert.NoError(t, err)
 	assert.Len(t, entries, 2)
-	assert.True(t, entries[0].Price.Equal(decimal.NewFromFloat(10.5)))
+	assert.True(t, entries[0].Price == 10.5)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
@@ -72,12 +71,12 @@ func TestPriceRepository_InsertPrices(t *testing.T) {
 	now := time.Now()
 	entries := []model.PriceHistoryEntry{
 		{
-			Price:         decimal.NewFromFloat(10.5),
+			Price:         10.5,
 			DeliveryStart: now,
 			DeliveryEnd:   now.Add(time.Hour),
 		},
 		{
-			Price:         decimal.NewFromFloat(12.0),
+			Price:         12.0,
 			DeliveryStart: now.Add(time.Hour),
 			DeliveryEnd:   now.Add(2 * time.Hour),
 		},
