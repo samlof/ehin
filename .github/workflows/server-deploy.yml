@@ -77,6 +77,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # 1. Check which files changed
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            cron:
+              - 'api/cron.template.yaml'
+
+      - name: Inject Secret into Cron
+        shell: bash
+        env:
+          UPDATE_PRICES_PASSWORD: ${{ secrets.UPDATE_PRICES_PASSWORD }}
+        run: envsubst '${UPDATE_PRICES_PASSWORD}' < api/cron.template.yaml > api/cron.yaml
+
       # Authentication via credentials json
       - id: auth
         uses: "google-github-actions/auth@v3"
@@ -94,3 +108,6 @@ jobs:
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             UPDATE_PRICES_PASSWORD=${{ secrets.UPDATE_PRICES_PASSWORD }}
             CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+          deliverables: >-
+            app.yaml
+            ${{ steps.changes.outputs.cron == 'true' && 'cron.yaml' || '' }}

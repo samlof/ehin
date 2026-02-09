@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -36,9 +37,20 @@ type UpdatePricesResponse struct {
 	Done bool `json:"done"`
 }
 
+func secureCompare(a, b string) bool {
+	if len(b) > 5000 {
+		return false
+	}
+	var sameLen = subtle.ConstantTimeEq(int32(len(a)), int32(len(b))) == 1
+	if !sameLen {
+		b = a
+	}
+	return subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1 && sameLen
+}
+
 func (res *PriceResource) UpdatePrices(w http.ResponseWriter, r *http.Request) {
 	password := r.URL.Query().Get("p")
-	if res.updatePricesPassword == "" || res.updatePricesPassword != password {
+	if res.updatePricesPassword == "" || !secureCompare(res.updatePricesPassword, password) {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
@@ -75,7 +87,7 @@ func (res *PriceResource) UpdatePrices(w http.ResponseWriter, r *http.Request) {
 
 func (res *PriceResource) UpdatePricesForDate(w http.ResponseWriter, r *http.Request) {
 	password := r.URL.Query().Get("p")
-	if res.updatePricesPassword == "" || res.updatePricesPassword != password {
+	if res.updatePricesPassword == "" || !secureCompare(res.updatePricesPassword, password) {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
@@ -161,7 +173,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		lastPrice := prices[len(prices)-1]
 		lastPriceDate := lastPrice.DeliveryStart.In(helsinki)
 		lastPriceDateOnly := time.Date(lastPriceDate.Year(), lastPriceDate.Month(), lastPriceDate.Day(), 0, 0, 0, 0, helsinki)
-		
+
 		if !lastPriceDateOnly.After(dateWithTime) {
 			pricesUpdateTime := time.Date(date.Year(), date.Month(), date.Day(), 11, 57, 0, 0, time.UTC)
 			if res.dateService.Now().After(pricesUpdateTime) {

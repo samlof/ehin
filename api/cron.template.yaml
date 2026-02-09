@@ -1,4 +1,4 @@
 cron:
   - description: "daily summary job"
-    url: /api/update-prices?p=***
+    url: /api/update-prices?p=${UPDATE_PRICES_PASSWORD}
     schedule: every 1 minutes from 11:30 to 13:00
