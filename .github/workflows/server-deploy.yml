@@ -10,10 +10,6 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GAR_LOCATION: ${{ secrets.GCP_PROJECT_REGION }}
-  REPOSITORY: ehin
-  SERVICE: ehin-server
-  REGION: ${{ secrets.GCP_PROJECT_REGION }}
 
 jobs:
   lint:
@@ -95,8 +91,9 @@ jobs:
         with:
           version: "latest"
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: "app-engine-go"
-          skip_install: false
+
+      - name: Install App Engine Go Component
+        run: gcloud components install app-engine-go --quiet
 
       - name: Deploy to App Engine
         uses: "google-github-actions/deploy-appengine@v3"
