@@ -95,6 +95,6 @@ jobs:
           working_directory: api
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           env_vars: |-
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            UPDATE_PRICES_PASSWORD=${{ secrets.UPDATE_PRICES_PASSWORD }}
-            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            UPDATE_PRICES_PASSWORD="${{ secrets.UPDATE_PRICES_PASSWORD }}"
+            CORS_ALLOWED_ORIGINS="${{ secrets.CORS_ALLOWED_ORIGINS }}"
