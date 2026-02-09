@@ -56,7 +56,7 @@ func (c *client) GetDayAheadPrices(date time.Time, market, deliveryArea, currenc
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch prices from NordPool: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("NordPool API returned unexpected status: %s", resp.Status)

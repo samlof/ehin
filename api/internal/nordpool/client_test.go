@@ -52,7 +52,7 @@ func TestGetDayAheadPrices(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -80,7 +80,7 @@ func TestGetDayAheadPrices(t *testing.T) {
 func TestGetDayAheadPrices_ErrorResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Bad Request")
+		_, _ = fmt.Fprint(w, "Bad Request")
 	}))
 	defer server.Close()
 
@@ -96,7 +96,7 @@ func TestGetDayAheadPrices_ErrorResponse(t *testing.T) {
 func TestGetDayAheadPrices_InvalidJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, "{invalid json}")
+		_, _ = fmt.Fprint(w, "{invalid json}")
 	}))
 	defer server.Close()
 

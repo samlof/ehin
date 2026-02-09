@@ -1,72 +1,66 @@
-# api
+# EHIN API
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This is the Go implementation of the EHIN API.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Development
 
-## Running the application in dev mode
+### Prerequisites
 
-You can run your application in dev mode that enables live coding using:
+- Go 1.25 or later
+- A PostgreSQL database (optional, for local development)
 
-```shell script
-./mvnw quarkus:dev
+### Running locally
+
+```bash
+go run cmd/api/main.go
 ```
 
-> **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+The server will start on port 8080 by default. You can configure it using environment variables or a `.env` file.
 
-## Packaging and running the application
+### Environment Variables
 
-The application can be packaged using:
+- `PORT`: Port to listen on (default: 8080)
+- `DATABASE_URL`: PostgreSQL connection string.
+- `UPDATE_PRICES_PASSWORD`: Password for the `/api/update-prices` endpoints
+- `CORS_ALLOWED_ORIGINS`: Comma-separated list of allowed origins
 
-```shell script
-./mvnw package
+## Database Migrations
+
+Database migrations are handled by [Goose](https://github.com/pressly/goose). They are run as part of the release pipeline.
+
+Migrations are located in `internal/migrations`.
+
+To create a new migration (requires goose CLI):
+```bash
+goose -dir internal/migrations create your_migration_name sql
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+To run migrations locally:
+```bash
+goose -dir internal/migrations postgres "your_database_url" up
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## Testing
 
-## Creating a native executable
+Run all tests:
 
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
+```bash
+go test ./...
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+## Deployment
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+The API is configured for Google App Engine.
 
-You can then execute your native executable with: `./target/api-0.1-runner`
+To build and deploy:
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-# Building and deploy
-
-```shell script
-./mvnw clean package -Dnative
-mv target/api-0.1-runner application
+```bash
+go build -o application cmd/api/main.go
 gcloud app deploy
+```
 
-gcloud app deploy cron.yaml
+To deploy the cron jobs:
+
+```bash
+gcloud app deploy backup_cron.yaml
 ```

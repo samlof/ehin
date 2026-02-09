@@ -1,8 +1,17 @@
-target/
-src/
-node_modules/
-package.json
-package-lock.json
-.mvn
-.quarkus
+# Exclude binary
+/application
+/api
+
+# Exclude source if building locally (but GAE usually builds on server)
+# Actually, if entrypoint is ./application, we might be uploading the binary.
+# But usually for GAE Go, you upload the source.
+
+# IDEs
 .idea
+.vscode
+
+# Local env
+.env
+
+# Go
+/vendor/

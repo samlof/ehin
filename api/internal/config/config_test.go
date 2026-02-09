@@ -1,13 +1,12 @@
 package config
 
 import (
-	"os"
 	"testing"
 )
 
 func TestLoadConfig(t *testing.T) {
-	os.Setenv("PORT", "9000")
-	os.Setenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:4000")
+	t.Setenv("PORT", "9000")
+	t.Setenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:4000")
 
 	cfg := LoadConfig()
 
