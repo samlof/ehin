@@ -1,0 +1,100 @@
+name: Build and Deploy to App Engine
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "api/**"
+      - ".github/workflows/server-deploy.yml"
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: ${{ secrets.GCP_PROJECT_REGION }}
+  REPOSITORY: ehin
+  SERVICE: ehin-server
+  REGION: ${{ secrets.GCP_PROJECT_REGION }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+          cache-dependency-path: api/go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: api
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+          cache-dependency-path: api/go.sum
+      - name: Run tests
+        working-directory: api
+        run: go test -race -v ./...
+
+  migrate:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+          cache-dependency-path: api/go.sum
+
+      - name: Install goose
+        run: go install --tags='no_mysql no_mssql no_clickhouse no_sqlite3 no_ydb no_vertica no_libsql' github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: Run migrations against production
+        working-directory: api
+        run: goose -dir internal/migrations postgres "${{ secrets.DATABASE_URL }}" up
+
+  deploy:
+    needs: [lint, test, migrate]
+    # Add 'id-token' with the intended permissions for workload identity federation
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Authentication via credentials json
+      - id: auth
+        uses: "google-github-actions/auth@v3"
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Deploy to App Engine
+        uses: "google-github-actions/deploy-appengine@v3"
+        with:
+          working_directory: api
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          env_vars: |-
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            UPDATE_PRICES_PASSWORD=${{ secrets.UPDATE_PRICES_PASSWORD }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
