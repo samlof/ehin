@@ -85,16 +85,6 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
 
-      # Setup gcloud CLI
-      - name: Set up Cloud SDK
-        uses: "google-github-actions/setup-gcloud@v3"
-        with:
-          version: "latest"
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Install App Engine Go Component
-        run: gcloud components install app-engine-go --quiet
-
       - name: Deploy to App Engine
         uses: "google-github-actions/deploy-appengine@v3"
         with:
