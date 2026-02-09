@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/samlof/ehin/internal/db/model"
@@ -58,19 +58,19 @@ func (s *PricesService) ToPriceHistoryEntries(prices *nordpool.PriceDataResponse
 
 func (s *PricesService) invalidPrices(prices *nordpool.PriceDataResponse) bool {
 	if prices == nil {
-		log.Println("Expected to find prices but was null")
+		slog.Warn("Expected to find prices but was null")
 		return true
 	}
 	if prices.Market != "DayAhead" {
-		log.Printf("Expected market DayAhead but got %s", prices.Market)
+		slog.Warn("Expected market DayAhead", "got", prices.Market)
 		return true
 	}
 	if prices.Currency != "EUR" {
-		log.Printf("Expected currency EUR but got %s", prices.Currency)
+		slog.Warn("Expected currency EUR", "got", prices.Currency)
 		return true
 	}
 	if len(prices.AreaStates) == 0 {
-		log.Println("Expected areaStates to not be empty")
+		slog.Warn("Expected areaStates to not be empty")
 		return true
 	}
 
@@ -88,11 +88,11 @@ func (s *PricesService) invalidPrices(prices *nordpool.PriceDataResponse) bool {
 	}
 
 	if fiState == nil {
-		log.Println("Couldn't find FI area from area states")
+		slog.Warn("Couldn't find FI area from area states")
 		return true
 	}
 	if fiState.State != "Final" {
-		log.Printf("Expected state Final but got %s", fiState.State)
+		slog.Warn("Expected state Final", "got", fiState.State)
 		return true
 	}
 

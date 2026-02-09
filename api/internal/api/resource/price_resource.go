@@ -2,7 +2,7 @@ package resource
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -43,30 +43,34 @@ func (res *PriceResource) UpdatePrices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Updating prices for tomorrow %s", time.Now().AddDate(0, 0, 1).Format("2006-01-02"))
+	slog.Info("Updating prices", "date", time.Now().AddDate(0, 0, 1).Format("2006-01-02"))
 	prices, err := res.pricesService.GetTomorrowsPrices()
 	if err != nil {
-		log.Printf("Error fetching tomorrow's prices: %v", err)
+		slog.Error("Error fetching tomorrow's prices", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if prices == nil {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false})
+		if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false}); err != nil {
+			slog.Error("Error encoding response", "error", err)
+		}
 		return
 	}
 
 	entries := res.pricesService.ToPriceHistoryEntries(prices)
 	_, err = res.priceRepository.InsertPrices(r.Context(), entries)
 	if err != nil {
-		log.Printf("Error inserting prices: %v", err)
+		slog.Error("Error inserting prices", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true})
+	if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true}); err != nil {
+		slog.Error("Error encoding response", "error", err)
+	}
 }
 
 func (res *PriceResource) UpdatePricesForDate(w http.ResponseWriter, r *http.Request) {
@@ -83,30 +87,34 @@ func (res *PriceResource) UpdatePricesForDate(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	log.Printf("Updating prices for %s", dateStr)
+	slog.Info("Updating prices", "date", dateStr)
 	prices, err := res.pricesService.GetPrices(date)
 	if err != nil {
-		log.Printf("Error fetching prices for %s: %v", dateStr, err)
+		slog.Error("Error fetching prices", "date", dateStr, "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if prices == nil {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false})
+		if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false}); err != nil {
+			slog.Error("Error encoding response", "error", err)
+		}
 		return
 	}
 
 	entries := res.pricesService.ToPriceHistoryEntries(prices)
 	_, err = res.priceRepository.InsertPrices(r.Context(), entries)
 	if err != nil {
-		log.Printf("Error inserting prices: %v", err)
+		slog.Error("Error inserting prices", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true})
+	if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true}); err != nil {
+		slog.Error("Error encoding response", "error", err)
+	}
 }
 
 func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) {
@@ -117,17 +125,17 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	log.Printf("Fetching prices for %s", dateStr)
+	slog.Info("Fetching prices", "date", dateStr)
 
 	if res.priceRepository == nil {
-		log.Println("Price repository not initialized")
+		slog.Warn("Price repository not initialized")
 		http.Error(w, "Database connection not available", http.StatusInternalServerError)
 		return
 	}
 
 	helsinki, err := time.LoadLocation("Europe/Helsinki")
 	if err != nil {
-		log.Printf("Error loading Europe/Helsinki: %v", err)
+		slog.Error("Error loading Europe/Helsinki", "error", err)
 		helsinki = time.UTC
 	}
 
@@ -140,7 +148,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 
 	prices, err := res.priceRepository.GetPrices(r.Context(), from, to)
 	if err != nil {
-		log.Printf("Error fetching prices from repository: %v", err)
+		slog.Error("Error fetching prices from repository", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -181,6 +189,6 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := json.NewEncoder(w).Encode(prices); err != nil {
-		log.Printf("Error encoding prices: %v", err)
+		slog.Error("Error encoding prices", "error", err)
 	}
 }

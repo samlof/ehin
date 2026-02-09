@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	_ "time/tzdata"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,17 +25,19 @@ func main() {
 		var err error
 		dbPool, err = pgxpool.New(context.Background(), cfg.DatabaseURL)
 		if err != nil {
-			log.Fatalf("Unable to connect to database: %v", err)
+			slog.Error("Unable to connect to database", "error", err)
+			os.Exit(1)
 		}
 		defer dbPool.Close()
 
 		// Test connection
 		if err := dbPool.Ping(context.Background()); err != nil {
-			log.Fatalf("Unable to ping database: %v", err)
+			slog.Error("Unable to ping database", "error", err)
+			os.Exit(1)
 		}
-		log.Println("Connected to database")
+		slog.Info("Connected to database")
 	} else {
-		log.Println("DATABASE_URL not set, running without database")
+		slog.Info("DATABASE_URL not set, running without database")
 	}
 
 	// Repository and Service initialization
@@ -54,7 +57,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "EHIN API (Go)")
+		_, _ = fmt.Fprintf(w, "EHIN API (Go)")
 	})
 
 	mux.HandleFunc("GET /hello", greetingResource.Hello)
@@ -65,8 +68,9 @@ func main() {
 	handler := middleware.CORS(cfg)(mux)
 
 	serverAddr := ":" + cfg.Port
-	log.Printf("Starting server on %s", serverAddr)
+	slog.Info("Starting server", "addr", serverAddr)
 	if err := http.ListenAndServe(serverAddr, handler); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+		slog.Error("Server failed to start", "error", err)
+		os.Exit(1)
 	}
 }
