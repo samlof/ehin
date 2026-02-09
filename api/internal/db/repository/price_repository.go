@@ -41,27 +41,30 @@ func (r *pgPriceRepository) Select1(ctx context.Context) error {
 	return err
 }
 
-// GetPrices retrieves prices within the specified time range.
-func (r *pgPriceRepository) GetPrices(ctx context.Context, from, to time.Time) ([]model.PriceHistoryEntry, error) {
-	query := `
+const getPricesQuery = `
 		SELECT price, delivery_start, delivery_end 
 		FROM price_history 
 		WHERE delivery_start >= $1 AND delivery_start < $2 
 		ORDER BY delivery_start
 	`
-	rows, err := r.db.Query(ctx, query, from, to)
+
+// GetPrices retrieves prices within the specified time range.
+func (r *pgPriceRepository) GetPrices(ctx context.Context, from, to time.Time) ([]model.PriceHistoryEntry, error) {
+	rows, err := r.db.Query(ctx, getPricesQuery, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query prices: %w", err)
 	}
 	defer rows.Close()
 
-	var entries []model.PriceHistoryEntry
+	// Usual response is 292 elements so 300 is fine
+	entries := make([]model.PriceHistoryEntry, 0, 300)
+	i := 0
 	for rows.Next() {
-		var entry model.PriceHistoryEntry
-		if err := rows.Scan(&entry.Price, &entry.DeliveryStart, &entry.DeliveryEnd); err != nil {
+		entries = append(entries, model.PriceHistoryEntry{})
+		if err := rows.Scan(&entries[i].Price, &entries[i].DeliveryStart, &entries[i].DeliveryEnd); err != nil {
 			return nil, fmt.Errorf("failed to scan price entry: %w", err)
 		}
-		entries = append(entries, entry)
+		i++
 	}
 
 	if err := rows.Err(); err != nil {
