@@ -93,9 +93,10 @@ jobs:
       - name: Set up Cloud SDK
         uses: "google-github-actions/setup-gcloud@v3"
         with:
-          version: ">= 363.0.0"
+          version: "latest"
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           install_components: "app-engine-go"
+          skip_install: false
 
       - name: Deploy to App Engine
         uses: "google-github-actions/deploy-appengine@v3"
