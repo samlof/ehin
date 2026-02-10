@@ -137,8 +137,6 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	slog.Info("Fetching prices", "date", dateStr)
-
 	if res.priceRepository == nil {
 		slog.Warn("Price repository not initialized")
 		http.Error(w, "Database connection not available", http.StatusInternalServerError)
@@ -157,6 +155,8 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 	// Range matching Java implementation: date-1 to date+4
 	from := dateWithTime.AddDate(0, 0, -1)
 	to := dateWithTime.AddDate(0, 0, 4)
+
+	slog.Info("Fetching prices from repository", "from", from, "to", to)
 
 	prices, err := res.priceRepository.GetPrices(r.Context(), from, to)
 	if err != nil {
