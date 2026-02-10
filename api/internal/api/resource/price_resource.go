@@ -168,8 +168,10 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 	cacheString := utils.CACHE_LONG
 	var expiresValue string
 
-	if len(prices) > 0 {
-		// Java: newestPriceDate.isAfter(date) ? CACHE_LONG : (isAfter(11:57) ? CACHE_VAR+max-age=60 : EXPIRES+CACHE_VAR)
+	if len(prices) > 200 {
+		// When there is new prices there should be at least 200 entries. Usually 292.
+		// If not then below 200. Often 196.
+
 		lastPrice := prices[len(prices)-1]
 		lastPriceDate := lastPrice.DeliveryStart.In(helsinki)
 		lastPriceDateOnly := time.Date(lastPriceDate.Year(), lastPriceDate.Month(), lastPriceDate.Day(), 0, 0, 0, 0, helsinki)
@@ -195,6 +197,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	slog.Info("Returning prices", "cacheString", cacheString, "expiresValue", expiresValue, "priceCount", len(prices))
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set(utils.CACHE_CONTROL_HEADER, cacheString)
 	if expiresValue != "" {

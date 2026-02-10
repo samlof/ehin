@@ -44,7 +44,7 @@ func (r *pgPriceRepository) Select1(ctx context.Context) error {
 const getPricesQuery = `
 		SELECT price, delivery_start, delivery_end 
 		FROM price_history 
-		WHERE delivery_start >= $1 AND delivery_start < $2 
+		WHERE delivery_start >= $1 AND delivery_start < $2
 		ORDER BY delivery_start
 	`
 
