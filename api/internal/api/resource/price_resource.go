@@ -154,7 +154,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 
 	// Range matching Java implementation: date-1 to date+4
 	from := dateWithTime.AddDate(0, 0, -1)
-	to := dateWithTime.AddDate(0, 0, 4)
+	to := dateWithTime.AddDate(0, 0, 3)
 
 	slog.Info("Fetching prices from repository", "from", from, "to", to)
 
@@ -174,7 +174,8 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		lastPriceDate := lastPrice.DeliveryStart.In(helsinki)
 		lastPriceDateOnly := time.Date(lastPriceDate.Year(), lastPriceDate.Month(), lastPriceDate.Day(), 0, 0, 0, 0, helsinki)
 
-		if !lastPriceDateOnly.After(dateWithTime) {
+		tomorrowDate := dateWithTime.AddDate(0, 0, 1)
+		if !lastPriceDateOnly.After(tomorrowDate) {
 			pricesUpdateTime := time.Date(date.Year(), date.Month(), date.Day(), 11, 57, 0, 0, time.UTC)
 			if res.dateService.Now().After(pricesUpdateTime) {
 				cacheString = utils.CACHE_VAR + ", max-age=60"

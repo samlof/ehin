@@ -81,7 +81,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 			repoReturn: []model.PriceHistoryEntry{
 				{
 					Price:         10,
-					DeliveryStart: time.Date(2023, 10, 28, 0, 0, 0, 0, helsinki), // Next day
+					DeliveryStart: time.Date(2023, 10, 29, 0, 0, 0, 0, helsinki), // Day after tomorrow
 				},
 			},
 			repoError:          nil,
@@ -160,7 +160,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 					date, _ := time.Parse("2006-01-02", tt.dateStr)
 					dateWithTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, helsinki)
 					from := dateWithTime.AddDate(0, 0, -1)
-					to := dateWithTime.AddDate(0, 0, 4)
+					to := dateWithTime.AddDate(0, 0, 3)
 					mockRepo.On("GetPrices", mock.Anything, from, to).Return(tt.repoReturn, tt.repoError)
 				}
 				if tt.repoError == nil && tt.repoReturn != nil {
