@@ -78,17 +78,21 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 			name:    "Success - Future Prices Available (Long Cache)",
 			dateStr: "2023-10-27",
 			now:     time.Date(2023, 10, 27, 10, 0, 0, 0, time.UTC),
-			repoReturn: []model.PriceHistoryEntry{
-				{
-					Price:         10,
-					DeliveryStart: time.Date(2023, 10, 29, 0, 0, 0, 0, helsinki), // Day after tomorrow
-				},
-			},
+			repoReturn: func() []model.PriceHistoryEntry {
+				entries := make([]model.PriceHistoryEntry, 201)
+				for i := range 201 {
+					entries[i] = model.PriceHistoryEntry{
+						Price:         10,
+						DeliveryStart: time.Date(2023, 10, 29, 0, 0, 0, 0, helsinki).Add(time.Duration(i) * time.Hour),
+					}
+				}
+				return entries
+			}(),
 			repoError:          nil,
 			expectedStatus:     http.StatusOK,
 			expectedCache:      utils.CACHE_LONG,
 			expectedExpires:    false,
-			expectedPriceCount: 1,
+			expectedPriceCount: 201,
 		},
 		{
 			name:    "Success - No Future Prices Yet - Before 11:57 (Expires Header)",
