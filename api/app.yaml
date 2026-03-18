@@ -1,4 +1,4 @@
-runtime: go125
+runtime: go126
 main: ./cmd/api
 instance_class: F1
 automatic_scaling:
