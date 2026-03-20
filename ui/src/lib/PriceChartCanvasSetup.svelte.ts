@@ -3,20 +3,24 @@ import { formatPrice } from '$lib/calcUtils';
 import { formatDateDay, formatDateTime, isNow } from '$lib/dateUtils';
 import type { PriceEntry } from '$lib/pricesApi';
 import {
-	BarController,
-	BarElement,
+	LineController,
+	LineElement,
+	PointElement,
 	CategoryScale,
 	Chart,
 	Colors,
 	Legend,
 	LinearScale,
 	Tooltip,
+	Filler,
 	type ChartConfiguration,
 	type ChartTypeRegistry,
+	BarController,
+	BarElement,
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-const defaultColor = 'rgba(54, 162, 235,0.5)';
+const defaultColor = 'rgba(0, 200, 0, 0.5)';
 const blueColor = 'rgba(0, 0, 200,0.5)';
 const redColor = 'rgba(200, 0, 0,0.5)';
 const greenColor = 'rgba(0, 200, 0,0.5)';
@@ -41,13 +45,21 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 	const biggest = +biggestTemp < 10 ? '10' : biggestTemp;
 	const pricesWithoutLast = prices.slice(0, prices.length - 2);
 	const config: MyChartConfig = {
-		type: 'bar',
+		type: 'line',
 		plugins: [ChartDataLabels],
 		options: {
+			interaction: {
+				mode: 'index',
+				intersect: false,
+			},
 			animation: {
 				duration: 1,
 			},
-			scales: {},
+			scales: {
+				y: {
+					beginAtZero: true,
+				},
+			},
 			plugins: {
 				datalabels: {
 					labels: {
@@ -63,7 +75,7 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 				},
 				tooltip: {
 					filter(e, index, array, data) {
-						return e.dataset.label === 'Hover helper' || e.dataset.label === 'c/kWh';
+						return e.dataset.label === 'c/kWh';
 					},
 					displayColors: false,
 					callbacks: {
@@ -83,21 +95,33 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 			datasets: [
 				{
 					label: 'c/kWh',
+					type: 'line',
 					data: prices.map((p) => formatPrice(p.p)),
-					backgroundColor: prices.map(chooseColor),
+					borderColor: (ctx: any) => {
+						const p = prices[ctx.p0DataIndex];
+						if (p) return chooseColor(p);
+						return 'rgba(0, 200, 0, 1)';
+					},
+					backgroundColor: 'rgba(0, 200, 0, 0.3)',
+					borderWidth: 3,
+					fill: 'origin',
+					stepped: 'middle',
+					pointRadius: 0,
+					pointHoverRadius: 5,
 					order: 7,
-					grouped: false,
 				},
 				{
 					label: 'Hover helper',
+					type: 'bar',
 					data: prices.map((p) => biggest),
 					backgroundColor: transparentColor,
 					order: 20,
-					hoverBackgroundColor: defaultColor,
+					hoverBackgroundColor: 'rgba(0, 200, 0, 0.3)',
 					grouped: false,
 				},
 				{
 					label: 'Day change',
+					type: 'bar',
 					backgroundColor: pricesWithoutLast.map((p) => {
 						return formatDateTime(p.s) === '0' ? blackColor : transparentColor;
 					}),
@@ -126,6 +150,7 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 	if (!showOnlyAfterNow) {
 		config.data.datasets.push({
 			label: 'Nyt',
+			type: 'bar',
 			data: prices.map((p) => (isNow(p) ? biggest : '0')),
 			grouped: false,
 			order: 3,
@@ -155,10 +180,14 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 
 Chart.register(
 	Colors,
+	LineController,
+	LineElement,
+	PointElement,
 	BarController,
 	BarElement,
 	CategoryScale,
 	LinearScale,
+	Filler,
 	Legend,
 	Tooltip,
 	ChartDataLabels,
