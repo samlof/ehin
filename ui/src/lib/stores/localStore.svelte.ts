@@ -29,5 +29,5 @@ export function localStore<T>(key: string, value: T) {
 }
 
 export const localSettings = {
-	showOnlyAfterNow: localStore('showOnlyAfterNow', false),
+	showOnlyAfterNow: localStore('showOnlyAfterNow', true),
 };
