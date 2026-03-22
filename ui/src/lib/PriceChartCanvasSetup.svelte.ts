@@ -19,6 +19,14 @@ import {
 	BarElement,
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { Context } from 'chartjs-plugin-datalabels';
+import type {
+	ScriptableLineSegmentContext,
+	ScriptableContext,
+	ChartDataset,
+	LegendItem,
+	TooltipItem,
+} from 'chart.js';
 
 const defaultColor = 'rgba(0, 200, 0, 0.5)';
 const blueColor = 'rgba(0, 0, 200,0.5)';
@@ -38,13 +46,13 @@ function chooseColor(p: PriceEntry) {
 	return defaultColor;
 }
 
-export type MyChartConfig = ChartConfiguration<keyof ChartTypeRegistry, string[], string>;
+export type MyChartConfig = ChartConfiguration<'line' | 'bar', (number | string | null)[], string>;
 
 export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): MyChartConfig {
 	const biggestTemp = formatPrice(Math.max(...prices.map((p) => p.p)));
-	const biggest = +biggestTemp < 10 ? '10' : biggestTemp;
+	const biggest = +biggestTemp < 10 ? 10 : +biggestTemp;
 	const pricesWithoutLast = prices.slice(0, prices.length - 2);
-	const config: MyChartConfig = {
+	const config = {
 		type: 'line',
 		plugins: [ChartDataLabels],
 		options: {
@@ -68,22 +76,22 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 				},
 				legend: {
 					labels: {
-						filter(item, data) {
+						filter(item: LegendItem) {
 							return item.text === 'c/kWh';
 						},
 					},
 				},
 				tooltip: {
-					filter(e, index, array, data) {
+					filter(e: TooltipItem<'line' | 'bar'>) {
 						return e.dataset.label === 'c/kWh';
 					},
 					displayColors: false,
 					callbacks: {
-						title(tooltipItems) {
+						title(tooltipItems: TooltipItem<'line' | 'bar'>[]) {
 							const p = prices[tooltipItems[0].dataIndex];
 							return formatDateTime(p.s) + ' - ' + formatDateTime(p.e);
 						},
-						label(tooltipItem) {
+						label(tooltipItem: TooltipItem<'line' | 'bar'>) {
 							return formatPrice(prices[tooltipItem.dataIndex].p) + ' c/kWh';
 						},
 					},
@@ -96,9 +104,10 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 				{
 					label: 'c/kWh',
 					type: 'line',
-					data: prices.map((p) => formatPrice(p.p)),
-					borderColor: (ctx: any) => {
-						const p = prices[ctx.p0DataIndex];
+					data: prices.map((p) => +formatPrice(p.p)),
+					borderColor: (ctx: ScriptableContext<'line' | 'bar'>) => {
+						const segmentCtx = ctx as unknown as ScriptableLineSegmentContext;
+						const p = prices[segmentCtx.p0DataIndex];
 						if (p) return chooseColor(p);
 						return 'rgba(0, 200, 0, 1)';
 					},
@@ -109,7 +118,7 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 					pointRadius: 0,
 					pointHoverRadius: 5,
 					order: 7,
-				},
+				} as ChartDataset<'line', number[]>,
 				{
 					label: 'Hover helper',
 					type: 'bar',
@@ -118,7 +127,7 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 					order: 20,
 					hoverBackgroundColor: 'rgba(0, 200, 0, 0.3)',
 					grouped: false,
-				},
+				} as ChartDataset<'bar', number[]>,
 				{
 					label: 'Day change',
 					type: 'bar',
@@ -135,15 +144,15 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 								color: 'black',
 							},
 						},
-						formatter(value, context) {
+						formatter(value: unknown, context: Context) {
 							return formatDateDay(prices[context.dataIndex].s);
 						},
-						display(context) {
+						display(context: Context) {
 							const p = prices[context.dataIndex];
 							return formatDateTime(p.s) === '0';
 						},
 					},
-				},
+				} as ChartDataset<'bar', number[]>,
 			],
 		},
 	};
@@ -151,7 +160,7 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 		config.data.datasets.push({
 			label: 'Nyt',
 			type: 'bar',
-			data: prices.map((p) => (isNow(p) ? biggest : '0')),
+			data: prices.map((p) => (isNow(p) ? biggest : 0)),
 			grouped: false,
 			order: 3,
 			categoryPercentage: 0.5,
@@ -161,11 +170,11 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 						color: 'black',
 					},
 				},
-				formatter(value, context) {
+				formatter(value: unknown, context: Context) {
 					const p = prices[context.dataIndex];
 					return formatPrice(p.p) + ' c/kWh';
 				},
-				display(context) {
+				display(context: Context) {
 					const p = prices[context.dataIndex];
 					return isNow(p);
 				},
@@ -173,9 +182,9 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 				anchor: 'center',
 				align: 'start',
 			},
-		});
+		} as ChartDataset<'bar', number[]>);
 	}
-	return config;
+	return config as unknown as MyChartConfig;
 }
 
 Chart.register(
@@ -194,10 +203,9 @@ Chart.register(
 );
 
 export function setupChart(elementId: string, config: () => MyChartConfig) {
-	let chart: Chart<keyof ChartTypeRegistry, string[], string>;
+	let chart: Chart<'line' | 'bar', (number | string | null)[], string>;
 	$effect(() => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		chart = new Chart(document.getElementById(elementId) as any, config());
+		chart = new Chart(document.getElementById(elementId) as HTMLCanvasElement, config());
 		return () => {
 			if (chart) {
 				chart.destroy();
