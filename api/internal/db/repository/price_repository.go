@@ -84,7 +84,7 @@ func (r *pgPriceRepository) InsertPrices(ctx context.Context, entries []model.Pr
 	// SQL: INSERT INTO price_history (delivery_start, delivery_end, price) VALUES ($1, $2, $3), ($4, $5, $6) ... ON CONFLICT (delivery_start) DO NOTHING
 
 	valueStrings := make([]string, 0, len(entries))
-	valueArgs := make([]interface{}, 0, len(entries)*3)
+	valueArgs := make([]any, 0, len(entries)*3)
 
 	for i, entry := range entries {
 		offset := i * 3

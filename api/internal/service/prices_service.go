@@ -2,6 +2,7 @@ package service
 
 import (
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/samlof/ehin/internal/db/model"
@@ -76,11 +77,8 @@ func (s *PricesService) invalidPrices(prices *nordpool.PriceDataResponse) bool {
 
 	var fiState *nordpool.AreaState
 	for _, state := range prices.AreaStates {
-		for _, area := range state.Areas {
-			if area == "FI" {
-				fiState = &state
-				break
-			}
+		if slices.Contains(state.Areas, "FI") {
+			fiState = &state
 		}
 		if fiState != nil {
 			break
