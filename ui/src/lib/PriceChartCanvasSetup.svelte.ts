@@ -105,12 +105,22 @@ export function chartConfig(prices: PriceEntry[], showOnlyAfterNow: boolean): My
 					label: 'c/kWh',
 					type: 'line',
 					data: prices.map((p) => +formatPrice(p.p)),
-					borderColor: (ctx: ScriptableContext<'line' | 'bar'>) => {
-						const segmentCtx = ctx as unknown as ScriptableLineSegmentContext;
-						const p = prices[segmentCtx.p0DataIndex];
-						if (p) return chooseColor(p);
-						return 'rgba(0, 200, 0, 1)';
+					segment: {
+						borderColor: (ctx: ScriptableLineSegmentContext) => {
+							const p = prices[ctx.p0DataIndex];
+							if (p) return chooseColor(p);
+							return defaultColor;
+						},
+						backgroundColor: (ctx: ScriptableLineSegmentContext) => {
+							const p = prices[ctx.p0DataIndex];
+							if (p) {
+								const c = chooseColor(p);
+								return c.replace(/[\d.]+\)$/, '0.3)');
+							}
+							return 'rgba(0, 200, 0, 0.3)';
+						},
 					},
+					borderColor: defaultColor,
 					backgroundColor: 'rgba(0, 200, 0, 0.3)',
 					borderWidth: 3,
 					fill: 'origin',
