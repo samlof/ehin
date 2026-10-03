@@ -45,13 +45,12 @@ func main() {
 	if dbPool != nil {
 		priceRepo = repository.NewPriceRepository(dbPool)
 	}
-	
+
 	nordPoolClient := nordpool.NewClient(cfg.NordPoolBaseURL)
 	dateService := service.NewDateService()
 	pricesService := service.NewPricesService(nordPoolClient, dateService)
 
 	// Resource initialization
-	greetingResource := resource.NewGreetingResource()
 	priceResource := resource.NewPriceResource(priceRepo, pricesService, dateService, cfg.UpdatePricesPassword)
 
 	mux := http.NewServeMux()
@@ -60,7 +59,6 @@ func main() {
 		_, _ = fmt.Fprintf(w, "EHIN API (Go)")
 	})
 
-	mux.HandleFunc("GET /hello", greetingResource.Hello)
 	mux.HandleFunc("GET /api/prices/{date}", priceResource.GetPastPrices)
 	mux.HandleFunc("GET /api/update-prices", priceResource.UpdatePrices)
 	mux.HandleFunc("GET /api/update-prices/{date}", priceResource.UpdatePricesForDate)
