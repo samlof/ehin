@@ -2,7 +2,7 @@ package resource
 
 import (
 	"crypto/subtle"
-	"encoding/json"
+	"encoding/json/v2"
 	"log/slog"
 	"net/http"
 	"time"
@@ -65,7 +65,7 @@ func (res *PriceResource) UpdatePrices(w http.ResponseWriter, r *http.Request) {
 
 	if prices == nil {
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false}); err != nil {
+		if err := json.MarshalWrite(w, UpdatePricesResponse{Done: false}); err != nil {
 			slog.Error("Error encoding response", "error", err)
 		}
 		return
@@ -80,7 +80,7 @@ func (res *PriceResource) UpdatePrices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true}); err != nil {
+	if err := json.MarshalWrite(w, UpdatePricesResponse{Done: true}); err != nil {
 		slog.Error("Error encoding response", "error", err)
 	}
 }
@@ -109,7 +109,7 @@ func (res *PriceResource) UpdatePricesForDate(w http.ResponseWriter, r *http.Req
 
 	if prices == nil {
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: false}); err != nil {
+		if err := json.MarshalWrite(w, UpdatePricesResponse{Done: false}); err != nil {
 			slog.Error("Error encoding response", "error", err)
 		}
 		return
@@ -124,7 +124,7 @@ func (res *PriceResource) UpdatePricesForDate(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(UpdatePricesResponse{Done: true}); err != nil {
+	if err := json.MarshalWrite(w, UpdatePricesResponse{Done: true}); err != nil {
 		slog.Error("Error encoding response", "error", err)
 	}
 }
@@ -204,7 +204,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set(utils.EXPIRES_HEADER, expiresValue)
 	}
 
-	if err := json.NewEncoder(w).Encode(prices); err != nil {
+	if err := json.MarshalWrite(w, prices); err != nil {
 		slog.Error("Error encoding prices", "error", err)
 	}
 }

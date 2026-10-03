@@ -1,7 +1,7 @@
 package nordpool
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"net/http"
 	"time"
@@ -63,7 +63,7 @@ func (c *client) GetDayAheadPrices(date time.Time, market, deliveryArea, currenc
 	}
 
 	var priceResp PriceDataResponse
-	if err := json.NewDecoder(resp.Body).Decode(&priceResp); err != nil {
+	if err := json.UnmarshalRead(resp.Body, &priceResp); err != nil {
 		return nil, fmt.Errorf("failed to decode NordPool response: %w", err)
 	}
 

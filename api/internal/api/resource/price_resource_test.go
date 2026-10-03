@@ -2,7 +2,7 @@ package resource
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -186,7 +186,7 @@ func TestPriceResource_GetPastPrices(t *testing.T) {
 				}
 
 				var prices []model.PriceHistoryEntry
-				err := json.NewDecoder(rr.Body).Decode(&prices)
+				err := json.UnmarshalRead(rr.Body, &prices)
 				assert.NoError(t, err)
 				assert.Len(t, prices, tt.expectedPriceCount)
 			}
@@ -237,7 +237,7 @@ func TestPriceResource_UpdatePrices(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		var resp UpdatePricesResponse
-		err := json.NewDecoder(rr.Body).Decode(&resp)
+		err := json.UnmarshalRead(rr.Body, &resp)
 		assert.NoError(t, err)
 		assert.True(t, resp.Done)
 	})
@@ -252,7 +252,7 @@ func TestPriceResource_UpdatePrices(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		var resp UpdatePricesResponse
-		err := json.NewDecoder(rr.Body).Decode(&resp)
+		err := json.UnmarshalRead(rr.Body, &resp)
 		assert.NoError(t, err)
 		assert.False(t, resp.Done)
 	})
@@ -294,7 +294,7 @@ func TestPriceResource_UpdatePricesForDate(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		var resp UpdatePricesResponse
-		err := json.NewDecoder(rr.Body).Decode(&resp)
+		err := json.UnmarshalRead(rr.Body, &resp)
 		assert.NoError(t, err)
 		assert.True(t, resp.Done)
 	})
