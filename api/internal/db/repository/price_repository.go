@@ -56,22 +56,31 @@ func (r *pgPriceRepository) GetPrices(ctx context.Context, from, to time.Time) (
 	}
 	defer rows.Close()
 
-	// Usual response is 292 elements so 300 is fine
-	entries := make([]model.PriceHistoryEntry, 0, 300)
+	// Pre-allocate full slice length to avoid append overhead. Normal return is 292 entries
+	entries := make([]model.PriceHistoryEntry, 300)
 	i := 0
+
 	for rows.Next() {
-		entries = append(entries, model.PriceHistoryEntry{})
-		if err := rows.Scan(&entries[i].Price, &entries[i].DeliveryStart, &entries[i].DeliveryEnd); err != nil {
+		if i == len(entries) {
+			// Double capacity if rows exceed initial estimate (rare case)
+			newEntries := make([]model.PriceHistoryEntry, len(entries)*2)
+			copy(newEntries, entries)
+			entries = newEntries
+		}
+
+		p := &entries[i]
+		if err := rows.Scan(&p.Price, &p.DeliveryStart, &p.DeliveryEnd); err != nil {
 			return nil, fmt.Errorf("failed to scan price entry: %w", err)
 		}
 		i++
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
+		return nil, fmt.Errorf("error iterating price rows: %w", err)
 	}
 
-	return entries, nil
+	// Reslice to trim trailing zero-value structs
+	return entries[:i], nil
 }
 
 // InsertPrices batch inserts price entries with ON CONFLICT DO NOTHING.

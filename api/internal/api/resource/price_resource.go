@@ -152,7 +152,7 @@ func (res *PriceResource) GetPastPrices(w http.ResponseWriter, r *http.Request) 
 	// Helsinki 00:00:00 on the requested date
 	dateWithTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, helsinki)
 
-	// Range matching Java implementation: date-1 to date+4
+	// date-1 to date+4
 	from := dateWithTime.AddDate(0, 0, -1)
 	to := dateWithTime.AddDate(0, 0, 3)
 
