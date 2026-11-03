@@ -3,7 +3,7 @@ module github.com/samlof/ehin
 go 1.27
 
 require (
-	github.com/jackc/pgx/v5 v5.12.0
+	github.com/jackc/pgx/v5 v5.11.0
 	github.com/joho/godotenv v1.5.1
 	github.com/pashagolub/pgxmock/v5 v5.2.0
 	github.com/rs/cors v1.11.1
