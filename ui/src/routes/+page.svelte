@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getPrices } from '$lib/pricesApi';
-	import PriceChart from '$lib/PriceChart.svelte';
-	import Settings from '$lib/Settings.svelte';
+	import { getPrices } from '#lib/pricesApi.js';
+	import PriceChart from '#lib/PriceChart.svelte';
+	import Settings from '#lib/Settings.svelte';
 
 	let pricesPromise = getPrices();
 

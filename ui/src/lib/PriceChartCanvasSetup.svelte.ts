@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { formatPrice } from '$lib/calcUtils';
-import { formatDateDay, formatDateTime, isNow } from '$lib/dateUtils';
-import type { PriceEntry } from '$lib/pricesApi';
+import { formatPrice } from '#lib/calcUtils.js';
+import { formatDateDay, formatDateTime, isNow } from '#lib/dateUtils.js';
+import type { PriceEntry } from '#lib/pricesApi.js';
 import {
 	LineController,
 	LineElement,

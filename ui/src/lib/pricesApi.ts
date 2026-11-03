@@ -1,11 +1,10 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_API_URL } from '$app/env/public';
 
 export interface ResponsePriceEntry {
 	p: number;
 	s: string;
 	e: string;
 }
-
 export interface PriceEntry {
 	p: number;
 	s: Date;

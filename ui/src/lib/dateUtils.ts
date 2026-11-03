@@ -1,4 +1,4 @@
-import type { PriceEntry } from '$lib/pricesApi';
+import type { PriceEntry } from '#lib/pricesApi.js';
 
 export function formatDateDay(d: Date): string {
 	return d.toLocaleDateString('fi-FI');

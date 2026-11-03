@@ -1,4 +1,4 @@
-import { formatSeconds, isNextDayVisible } from '$lib/dateUtils';
+import { formatSeconds, isNextDayVisible } from '#lib/dateUtils.js';
 import { describe, expect, test } from 'vitest';
 
 describe('lib/dateUtils.ts', () => {

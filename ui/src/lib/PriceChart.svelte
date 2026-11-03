@@ -1,9 +1,14 @@
 <script lang="ts">
-	import { formatPrice } from '$lib/calcUtils';
-	import { formatSeconds, isNow, isNextDayVisible, secondsBeforeToTryFetch } from '$lib/dateUtils';
-	import { breakpoint, type breakpointVals } from '$lib/mediaQuery.svelte';
-	import { chartConfig, setupChart } from '$lib/PriceChartCanvasSetup.svelte';
-	import type { PriceEntry } from '$lib/pricesApi';
+	import { formatPrice } from '#lib/calcUtils.js';
+	import {
+		formatSeconds,
+		isNow,
+		isNextDayVisible,
+		secondsBeforeToTryFetch,
+	} from '#lib/dateUtils.js';
+	import { breakpoint, type breakpointVals } from '#lib/mediaQuery.svelte.js';
+	import { chartConfig, setupChart } from '#lib/PriceChartCanvasSetup.svelte.js';
+	import type { PriceEntry } from '#lib/pricesApi.js';
 	import { onMount } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import { localSettings } from './stores/localStore.svelte';
